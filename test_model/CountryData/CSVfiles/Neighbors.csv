@@ -1,0 +1,258 @@
+iso_alpha2,iso_numeric,Country,population,neighbors,langs_official,langs_sec,DST_legal
+AC,,,940,,,en,
+AD,20,Andorra,85458,ES,ca,es fr,UTC+2 UTC+1
+AE,784,United Arab Emirates,5628810,OM SA,ar,ml ps bal fa,UTC+4
+AF,4,Afghanistan,31822800,CN IR PK TJ TM UZ,fa ps,haz uz_Arab tk_Latn prd,UTC+4.30
+AG,28,Antigua and Barbuda,91295,,en,pt,UTC-4
+AI,660,Anguilla,16086,,en,,UTC-4
+AL,8,Albania,3020210,GR ME MK,sq,el,UTC+2 UTC+1
+AM,51,Armenia,3060630,AZ GE IR TR,hy,ku_Latn,UTC+4
+AO,24,Angola,19088100,CD CG NA ZM,pt,umb kmb,UTC+1
+AQ,10,Antarctica,300,,,und,
+AR,32,Argentina,43024400,BO BR CL PY UY,es,en,UTC-3
+AS,16,American Samoa,54517,,sm,en,UTC-11
+AT,40,Austria,8223060,CH CZ DE HU IT LI SI SK,de,bar en hr,UTC+2 UTC+1
+AU,36,Australia,22507600,,,en zh_Hant it,UTC+8 UTC+10.30 UTC+9.30 UTC+10 UTC+11 UTC+6.30 UTC+7 UTC+11.30
+AW,533,Aruba,110663,,nl pap,en,UTC-4
+AX,248,Åland Islands,26200,,sv,,
+AZ,31,Azerbaijan,9686210,AM GE IR RU TR,az_Latn az_Cyrl,tly_Latn,UTC+5 UTC+4
+BA,70,Bosnia and Herzegovina,3871640,HR ME RS,bs_Cyrl bs_Latn hr sr_Cyrl sr_Latn,en,UTC+2 UTC+1
+BB,52,Barbados,289680,,en,,UTC-4
+BD,50,Bangladesh,166281000,IN MM,bn,en rkt syl,UTC+6
+BE,56,Belgium,10449400,DE LU NL,nl fr de,en vls wa,UTC+2 UTC+1
+BF,854,Burkina Faso,18365100,BJ CI GH ML NE TG,fr,mos dyu,
+BG,100,Bulgaria,6924720,GR MK RO RS TR,bg,en tr,UTC+3 UTC+2
+BH,48,Bahrain,1314090,,ar,ml,UTC+3
+BI,108,Burundi,10395900,CD RW TZ,rn fr en,,UTC+2
+BJ,204,Benin,10160600,BF NE NG TG,fr,fon yo,UTC+1
+BL,652,Saint Barthélemy,7267,,fr,,
+BM,60,Bermuda,69839,,en,,UTC-3 UTC-4
+BN,96,Brunei Darussalam,422675,MY,ms_Latn ms_Arab,zh_Hant en,UTC+8
+BO,68,"Bolivia",10631500,AR BR CL PE PY,es qu ay,,UTC-4
+BQ,535,"Bonaire, Sint Eustatius and Saba",20000,,nl,pap,UTC-4
+BR,76,Brazil,202657000,AR BO CO GY PE PY SR UY VE,pt,en,UTC-2 UTC-3
+BS,44,Bahamas,321834,,en,,UTC-4 UTC-5
+BT,64,Bhutan,733643,CN IN,dz,ne tsj en lep,UTC+6
+BV,74,Bouvet Island,1,,,und,
+BW,72,Botswana,2155780,NA ZA ZM ZW,en tn,,UTC+2
+BY,112,Belarus,9608060,LT LV PL RU UA,be ru,,UTC+3
+BZ,84,Belize,340844,GT MX,en,es,UTC-6
+CA,124,Canada,34834800,US,en fr,it de,UTC-6 UTC-7 UTC-8 UTC-5 UTC-3 UTC-4 UTC-2.5 UTC-3.5
+CC,166,Cocos (Keeling) Islands,596,,,ms_Arab en,
+CD,180,"Democratic Republic of the Congo",77433700,AO BI CF CG RW SS TZ UG ZM,fr,sw lua swc ln lu kg,
+CF,140,Central African Republic,5277960,CD CG CM SD SS TD,fr sg,,UTC+1
+CG,178,Congo,4662450,AO CD CF CM GA,fr,ln,UTC+1
+CH,756,Switzerland,8061520,AT DE IT LI,de fr it,gsw en lmo,UTC+2 UTC+1
+CI,384,Cote d'Ivoire,22848900,BF GH GN LR ML,fr,bci sef dnj,
+CK,184,Cook Islands,10134,,en,,UTC-10
+CL,152,Chile,17363900,AR BO PE,es,en arn,UTC-3 UTC-4
+CM,120,Cameroon,23130700,CF CG GA GQ NG TD,fr en,bum ff ewo ybb bbj nnh bkm bas bax byv mua,UTC+1
+CN,156,China,1355690000,AF BT HK IN KG KP KZ LA MM MN MO NP PK RU TJ VN,zh_Hans,wuu hsn hak nan gan,UTC+8
+CO,170,Colombia,46245300,BR EC PA PE VE,es,,UTC-5
+CP,,,1,,,und,
+CR,188,Costa Rica,4755230,NI PA,es,,UTC-6
+CU,192,Cuba,11047300,,es,,UTC-4 UTC-5
+CV,132,Cape Verde,538535,,pt,kea,UTC-1
+CW,531,Curaçao,146836,,nl,pap es,UTC-4
+CX,162,Christmas Island,1530,,en,,
+CY,196,Cyprus,1172460,,el tr,en,UTC+3 UTC+2
+CZ,203,Czech Republic,10627400,AT DE PL SK,cs,en,UTC+2 UTC+1
+DE,276,Germany,80996700,AT BE CH CZ DK LU NL PL,de,en fr nds nl it es ru vmf tr da swg,UTC+2 UTC+1
+DG,,,500,,,en,
+DJ,262,Djibouti,810179,ER ET,ar fr,aa so,UTC+3
+DK,208,Denmark,5569080,DE,da,en,UTC+2 UTC+1
+DM,212,Dominica,73449,,en,,UTC-4
+DO,214,Dominican Republic,10349700,HT,es,,UTC-4
+DZ,12,Algeria,38813700,EH LY MA ML MR NE TN,ar fr,arq kab en,UTC+1
+EA,,,150000,,es,,
+EC,218,Ecuador,15654400,CO PE,es qu,qug,UTC-5
+EE,233,Estonia,1257920,LV RU,et,ru vro,UTC+3 UTC+2
+EG,818,Egypt,86895100,IL LY PS SD,ar,arz en,UTC+2
+EH,732,Western Sahara,554795,DZ MA MR,ar,,
+ER,232,Eritrea,6380800,DJ ET SD,en ar,ti tig aa ssy byn,UTC+3
+ES,724,Spain,47737900,AD GI MA PT,es,en ca gl eu ast,UTC+2 UTC+1
+ET,231,Ethiopia,96633500,DJ ER KE SD SO SS,am,en om so ti sid wal aa,UTC+3
+FI,246,Finland,5268800,RU SE,fi sv,en,UTC+3 UTC+2
+FJ,242,Fiji,903207,,en hif_Latn fj,hi,UTC+13 UTC+12
+FK,238,Falkland Islands (Malvinas),3361,,en,,UTC-3
+FM,583,"Micronesia, Federated States of",105681,,en,chk pon kos yap uli,UTC+11
+FO,234,Faroe Islands,49947,,fo,,UTC+1
+FR,250,France,66259000,,fr,en oc it pt pcd,UTC+2 UTC+1
+GA,266,Gabon,1672600,CG CM GQ,fr,puu,UTC+1
+GB,826,United Kingdom,63743000,IE,en,sco,UTC+1
+GD,308,Grenada,110152,,en,,UTC-4
+GE,268,Georgia,4935880,AM AZ RU TR,ka,xmf ru hy ab os,UTC+4
+GF,254,French Guiana,199509,,fr,gcr zh_Hant,UTC-3
+GG,831,Guernsey,65849,,en,,
+GH,288,Ghana,25758100,BF CI TG,en,ak ee abr gur ada gaa nzi,
+GI,292,Gibraltar,29185,ES,en,es,UTC+2 UTC+1
+GL,304,Greenland,57728,,kl,da,UTC-2 UTC-3
+GM,270,Gambia,1925530,SN,en,man_Latn,
+GN,324,Guinea,11474400,CI GW LR ML SL SN,fr,ff man_Nkoo sus nqo kpe,
+GP,312,Guadeloupe,452776,,fr,,UTC-4
+GQ,226,Equatorial Guinea,722254,CM GA,es fr,fan bvb,UTC+1
+GR,300,Greece,10775600,AL BG MK TR,el,en pnt_Grek mk tr,UTC+3 UTC+2
+GS,239,South Georgia and the South Sandwich Islands,20,,,und,
+GT,320,Guatemala,14647100,BZ HN MX SV,es,quc,UTC-6
+GU,316,Guam,161001,,ch,en,UTC+10
+GW,624,Guinea-Bissau,1693400,GN SN,pt,,
+GY,328,Guyana,735554,BR SR VE,en,,UTC-4
+HK,344,Hong Kong,7112690,CN,zh_Hant en,zh_Hans,UTC+8
+HM,334,Heard Island and McDonald Islands,1,,,und,
+HN,340,Honduras,8598560,GT NI SV,es,,UTC-6
+HR,191,Croatia,4470530,BA HU ME RS SI,hr,en it,UTC+2 UTC+1
+HT,332,Haiti,9996730,DO,ht fr,,UTC-4 UTC-5
+HU,348,Hungary,9919130,AT HR RO RS SI SK UA,hu,en de,UTC+2 UTC+1
+IC,,,2098590,,es,,
+ID,360,Indonesia,253610000,MY PG TL,id,jv su mad ms_Arab min bew ban bug bjn ace,UTC+7
+IE,372,Ireland,4832770,GB,en ga,,UTC+1
+IL,376,Israel,7821850,EG JO LB PS SY,he ar,en ru ro yi pl lad hu,UTC+3 UTC+2
+IM,833,Isle of Man,86866,,en gv,,
+IN,356,India,1236340000,BD BT CN MM NP PK,hi en,bn te mr ta ur gu kn ml or pa_Guru bho awa as bgc mag mwr mai hne,UTC+5.30
+IO,86,British Indian Ocean Territory,3500,,en,,UTC-4
+IQ,368,Iraq,32585700,IR JO KW SA SY TR,ar,en ckb az_Arab,UTC+3
+IR,364,"Iran",80840700,AF AM AZ IQ PK TM TR,fa,az_Arab mzn glk ckb sdh tk_Latn lrc ar bal rmt bqi luz,UTC+4.30 UTC+3.30
+IS,352,Iceland,317351,,is,,
+IT,380,Italy,61680100,AT CH SI SM VA,it,en fr sc de vec,UTC+2 UTC+1
+JE,832,Jersey,96513,,en,,
+JM,388,Jamaica,2930050,,en,jam,UTC-5
+JO,400,Jordan,7930490,IL IQ PS SA SY,ar,en,UTC+3 UTC+2
+JP,392,Japan,127103000,,ja,,UTC+9
+KE,404,Kenya,45010100,ET SO SS TZ UG,sw en,ki luy luo kam kln guz mer mas ebu so,UTC+3
+KG,417,Kyrgyzstan,5604210,CN KZ TJ UZ,ky_Cyrl ru,,UTC+6
+KH,116,Cambodia,15458300,LA TH VN,km,cja,UTC+7
+KI,296,Kiribati,104488,,en gil,,UTC+12
+KM,174,Comoros,766865,,ar fr zdj wni,,UTC+3
+KN,659,Saint Kitts and Nevis,51538,,en,,UTC-4
+KP,408,"North Korea",24851600,CN KR RU,ko,,UTC+9
+KR,410,"South Korea",49040000,KP,ko,,UTC+9
+KW,414,Kuwait,2742710,IQ SA,ar,,UTC+3
+KY,136,Cayman Islands,54914,,en,,UTC-5
+KZ,398,Kazakhstan,17948800,CN KG RU TM UZ,ru kk_Cyrl,en de ug_Cyrl,UTC+6
+LA,418,Laos,6803700,CN KH MM TH VN,lo,kjg,UTC+7
+LB,422,Lebanon,5882560,IL SY,ar,en hy ku_Arab,UTC+3 UTC+2
+LC,662,Saint Lucia,163362,,en,,UTC-4
+LI,438,Liechtenstein,37313,AT CH,de,gsw wae,UTC+2 UTC+1
+LK,144,Sri Lanka,21866400,,si ta,en,UTC+5.30
+LR,430,Liberia,4092310,CI GN SL,en,kpe vai_Vaii,
+LS,426,Lesotho,1942010,ZA,st en,zu ss,UTC+2
+LT,440,Lithuania,3505740,BY LV PL RU,lt,en ru,UTC+3 UTC+2
+LU,442,Luxembourg,520672,BE DE,fr lb de,,UTC+2 UTC+1
+LV,428,Latvia,2165170,BY EE LT RU,lv,ru ltg,UTC+3 UTC+2
+LY,434,Libya,6244170,DZ EG NE SD TD TN,ar,,UTC+2 UTC+1
+MA,504,Morocco,32987200,DZ EH ES,ar tzm_Latn,ary zgh fr en shi_Latn shi_Tfng rif_Latn rif_Tfng,UTC+1
+MC,492,Monaco,30508,,fr,,UTC+2 UTC+1
+MD,498,"Moldova",3583290,RO UA,ro,uk bg gag ru,UTC+3 UTC+2
+ME,499,Montenegro,650036,AL BA HR RS,sr_Latn,sq sr_Cyrl,UTC+2 UTC+1
+MF,663,Saint Martin (French part),31530,SX,fr,,
+MG,450,Madagascar,23201900,,mg fr en,,UTC+3
+MH,584,Marshall Islands,70983,,en mh,,UTC+12
+MK,807,"Macedonia",2091720,AL BG GR RS,mk,sq tr,UTC+2 UTC+1
+ML,466,Mali,16455900,BF CI DZ GN MR NE SN,fr,bm_Latn ffm snk mwk ses tmh bm_Nkoo khq dtm kao,
+MM,104,Myanmar,55746300,BD CN IN LA TH,my,shn kac mnw,UTC+6.30
+MN,496,Mongolia,2953190,CN RU,mn_Cyrl,kk_Arab zh_Hans,UTC+8
+MO,446,Macao,587914,CN,zh_Hant pt,zh_Hans en,UTC+8
+MP,580,Northern Mariana Islands,51483,,,en ch,UTC+10
+MQ,474,Martinique,436131,,fr,,UTC-4
+MR,478,Mauritania,3516810,DZ EH ML SN,ar,fr ff,
+MS,500,Montserrat,5215,,en,,UTC-4
+MT,470,Malta,412655,,mt en,,UTC+2 UTC+1
+MU,480,Mauritius,1331160,,en fr,mfe bho ur ta,UTC+4
+MV,462,Maldives,393595,,dv,,UTC+5
+MW,454,Malawi,17377500,MZ TZ ZM,en ny,tum,UTC+2
+MX,484,Mexico,120287000,BZ GT US,,es en,UTC-5 UTC-6 UTC-7 UTC-8
+MY,458,Malaysia,30073400,BN ID TH,ms_Latn,en zh_Hant ta iba jv zmi,UTC+8
+MZ,508,Mozambique,24692100,MW SZ TZ ZA ZM ZW,pt,vmw ndc ts ngl seh mgh rng ny yao,UTC+2
+NA,516,Namibia,2198410,AO BW ZA ZM ZW,en,af kj ng naq hz,UTC+2 UTC+1
+NC,540,New Caledonia,267840,,fr,,UTC+11
+NE,562,Niger,17466200,BF BJ DZ LY ML NG TD,fr,ha_Latn dje fuq tmh,UTC+1
+NF,574,Norfolk Island,2210,,en,,
+NG,566,Nigeria,177156000,BJ CM NE TD,en yo,pcm ha_Latn ig fuv tiv efi ibb ha_Arab,UTC+1
+NI,558,Nicaragua,5848640,CR HN,es,,UTC-6
+NL,528,Netherlands,16877400,BE DE,nl,en de fr nds li fy gos id zea rif_Latn tr,UTC+2 UTC+1
+NO,578,Norway,5147790,,nb nn,se,UTC+2 UTC+1
+NP,524,Nepal,30987000,CN IN,ne,mai bho new jml en taj awa thl bap tdg thr mgp lif_Deva thq,UTC+5.45
+NR,520,Nauru,9488,,en na,,UTC+12
+NU,570,Niue,1190,,en niu,,UTC-11
+NZ,554,New Zealand,4401920,,mi,en,UTC+13 UTC+12
+OM,512,Oman,3219780,AE SA YE,ar,bal,UTC+4
+PA,591,Panama,3608430,CO CR,es,en,UTC-5
+PE,604,Peru,30147900,BO BR CL CO EC,es qu,ay,UTC-5
+PF,258,French Polynesia,280026,,fr ty,zh_Hant,UTC-10
+PG,598,Papua New Guinea,6552730,ID,tpi en ho,,UTC+10
+PH,608,Philippines,107668000,,en fil,es ceb ilo hil bik war bhk pam pag mdh tsg,UTC+8
+PK,586,Pakistan,196174000,AF CN IN IR,ur en,pa_Arab lah ps sd_Arab skr bal brh hno,UTC+5
+PL,616,Poland,38346300,BY CZ DE LT RU SK UA,pl,en szl,UTC+2 UTC+1
+PM,666,Saint Pierre and Miquelon,5716,,fr,en,UTC-2 UTC-3
+PN,612,Pitcairn,48,,en,,
+PR,630,Puerto Rico,3620900,,es,en,UTC-4
+PS,275,"Palestine",4547430,EG IL JO,ar,,
+PT,620,Portugal,10813800,ES,pt,en,UTC+1
+PW,585,Palau,21186,,pau en,,UTC+9
+PY,600,Paraguay,6703860,AR BO BR,gn es,de,UTC-3 UTC-4
+QA,634,Qatar,2123160,SA,ar,fa,UTC+3
+RE,638,Réunion,787584,,fr,rcf ta,
+RO,642,Romania,21729900,BG HU MD RS UA,ro,en hu,UTC+3 UTC+2
+RS,688,Serbia,7209760,BA BG HR HU ME MK RO,sr_Cyrl sr_Latn,sq hu ro,UTC+2 UTC+1
+RU,643,Russia,142470000,AZ BY CN EE FI GE KP KZ LT LV MN PL UA,ru,tt ba cv,UTC+4
+RW,646,Rwanda,12337100,BI CD TZ UG,rw en fr,,UTC+2
+SA,682,Saudi Arabia,27346000,AE IQ JO KW OM QA YE,ar,,UTC+3
+SB,90,Solomon Islands,609883,,en,rug,UTC+11
+SC,690,Seychelles,91650,,fr en,crs,UTC+4
+SD,729,Sudan,35482200,CF EG ER ET LY SS TD,ar en,bej fvr ha_Arab,UTC+3
+SE,752,Sweden,9723810,FI,sv,en fi,UTC+2 UTC+1
+SG,702,Singapore,5567300,,en zh_Hans ms_Latn ta,,UTC+8
+SH,654,"Saint Helena, Ascension and Tristan da Cunha",7776,,en,,
+SI,705,Slovenia,1988290,AT HR HU IT,sl,en,UTC+2 UTC+1
+SJ,744,Svalbard and Jan Mayen,1872,,nb,ru,
+SK,703,Slovakia,5443580,AT CZ HU PL UA,sk,en hu uk,UTC+2 UTC+1
+SL,694,Sierra Leone,5743730,GN LR,en,kri men tem,
+SM,674,San Marino,32742,IT,it,,UTC+2 UTC+1
+SN,686,Senegal,13635900,GM GN GW ML MR,fr,wo ff srr dyo sav,
+SO,706,Somalia,10428000,ET KE,so ar,sw,UTC+3
+SR,740,Suriname,573311,BR GY,nl,srn zh_Hant,UTC-3
+SS,728,South Sudan,11562700,CD CF ET KE SD UG,en,ar nus,UTC+3
+ST,678,Sao Tome and Principe,190428,,pt,,
+SV,222,El Salvador,6125510,GT HN,es,,UTC-6
+SX,534,Sint Maarten (Dutch part),39689,MF,en nl,es vic,UTC-4
+SY,760,Syria,17951600,IL IQ JO LB TR,ar fr,ku_Latn hy,UTC+3 UTC+2
+SZ,748,Swaziland,1419620,MZ ZA,en ss,zu ts,UTC+2
+TA,,,275,,,en,
+TC,796,Turks and Caicos Islands,49070,,en,,UTC-4 UTC-5
+TD,148,Chad,11412100,CF CM LY NE NG SD,fr ar,,UTC+1
+TF,260,French Southern Territories,140,,,fr,UTC+4
+TG,768,Togo,7351370,BF BJ GH,fr,ee,
+TH,764,Thailand,67741400,KH LA MM MY,th,en tts nod sou mfa zh_Hant kxm,UTC+7
+TJ,762,Tajikistan,8051510,AF CN KG UZ,tg_Cyrl,ru,UTC+5
+TK,772,Tokelau,1337,,en tkl,,UTC+13
+TL,626,Timor-Leste,1201540,ID,pt tet,,UTC+9
+TM,795,Turkmenistan,5171940,AF IR KZ UZ,tk_Latn,ru uz_Latn,UTC+5
+TN,788,Tunisia,10937500,DZ LY,ar fr,aeb,UTC+1
+TO,776,Tonga,106440,,to en,,UTC+13
+TR,792,Turkey,81619400,AM AZ BG GE GR IQ IR SY,tr,en ku_Latn zza,UTC+3 UTC+2
+TT,780,Trinidad and Tobago,1223920,,en,,UTC-4
+TV,798,Tuvalu,10782,,tvl en,,UTC+12
+TW,158,"Taiwan",23359900,,zh_Hant,,UTC+8
+TZ,834,"Tanzania",49639100,BI CD KE MW MZ RW UG ZM,sw en,suk nym kde bez ksb mas mgy asa,UTC+3
+UA,804,Ukraine,44291400,BY HU MD PL RO RU SK,uk,ru pl yi rue,UTC+3 UTC+2
+UG,800,Uganda,35918900,CD KE RW SS TZ,sw en,lg nyn cgg xog teo laj ach myx rw ttj,UTC+3
+UM,581,United States Minor Outlying Islands,316,,,en,
+US,840,United States,318892000,CA MX,,en es,UTC-4 UTC-5 UTC-6 UTC-7 UTC-8 UTC-9 UTC-10
+UY,858,Uruguay,3332970,AR BR,es,,UTC-2 UTC-3
+UZ,860,Uzbekistan,28929700,AF KG KZ TJ TM,uz_Latn uz_Cyrl,ru kaa,UTC+5
+VA,336,Holy See (Vatican City State),842,IT,,it la,UTC+2 UTC+1
+VC,670,Saint Vincent and the Grenadines,102918,,en,,UTC-4
+VE,862,"Venezuela",28868500,BR CO GY,es,,UTC-4.30
+VG,92,"Virgin Islands, British",32680,,en,,
+VI,850,"Virgin Islands, U.S.",104170,,,en,UTC-4
+VN,704,Vietnam,93421800,CN KH LA,vi,zh_Hant,UTC+7
+VU,548,Vanuatu,266937,,bi en fr,,UTC+11
+WF,876,Wallis and Futuna,15561,,fr,wls fud,UTC+12
+WS,882,Samoa,196628,,sm en,,UTC+14 UTC+13
+XK,,,1859200,,sq sr_Cyrl sr_Latn,aln,
+YE,887,Yemen,26053000,OM SA,ar,en,UTC+3
+YT,175,Mayotte,194000,,fr,swb buc sw,
+ZA,710,South Africa,48375600,BW LS MZ NA SZ ZW,en,zu xh af nso tn st ts ss ve hi nr,UTC+2
+ZM,894,Zambia,14638500,AO BW CD MW MZ NA TZ ZW,en,bem ny loz,UTC+2
+ZW,716,Zimbabwe,13771700,BW MZ NA ZA ZM,sn en nd,mxc ndc kck ny,UTC+2
+ZZ,,,0,,,,
