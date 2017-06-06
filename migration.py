@@ -5,9 +5,13 @@ import pandas as pd
 import random
 import time
 
+# from dask import dataframe as ddf
+# from dask.dataframe.utils import make_meta
+# from dask.multiprocessing import get
+
 # The minimum size of a country (in population) to be added to the model.
 MIN_POPULATION = 1900000
-POPULATION_SCALE = 1 / 10_000
+POPULATION_SCALE = 1 / 100
 MIGRATION_THRESHOLD = 0.75
 BRAIN_DRAIN_THRESHOLD = 1.0
 
@@ -125,8 +129,8 @@ with open(csv_path("Mainconflicttable.csv")) as fh:
 # We will now convert that 
 
 df = pd.DataFrame(countries).transpose()
-dd = df[df.Unemployment.isnull()]
-
+df[["Population"]] = df[["Population"]].apply(pd.to_numeric, downcast="unsigned")
+df[["Conflict", "Fertility", "GDP", "Unemployment"]] = df[["Conflict", "Fertility", "GDP", "Unemployment"]].apply(pd.to_numeric, downcast="float")
 # Some countries are missing data. We will guess this data using that of
 # neighboring countries.
 
@@ -142,12 +146,20 @@ for i in range(2):
 for i in range(2):
     for item, frame in df[df.Fertility.isnull()]["Neighbors"].iteritems():
         df.set_value(item, "Fertility", df[df.index.isin(frame)]["Fertility"].mean())
+# Fill in GDP data
+for i in range(2):
+    for item, frame in df[df.GDP.isnull()]["Neighbors"].iteritems():
+        df.set_value(item, "GDP", df[df.index.isin(frame)]["GDP"].mean())
 
 # Now we will generate our agents.
 world_population = df["Population"].sum()
 model_population = world_population
 world_columns = ["Country", "Income", "Employed", "Attachment", "Location", "Migration"]
 world = pd.DataFrame(index=range(model_population), columns=world_columns)
+world.Employed = world.Employed.astype('bool')
+world.Income = world.Income.astype('float32')
+world.Attachment = world.Attachment.astype('float32')
+world.Migration = world.Migration.astype('float32')
 
 def max_value(attribute):
     return df[attribute].max()
@@ -155,16 +167,19 @@ def max_value(attribute):
 def neighbors(country):
     return df[df.index == country].iloc[0].Neighbors
 
+country_keys = list(countries)
+country_lookup = {}
+for i, x in enumerate(countries):
+    country_lookup[x] = i
+
 def generate_agents(country, start):
     country_data = df[df.index == country].to_dict("records")[0]
     population = country_data["Population"]
     gdp = country_data["GDP"]
-    #scaled_gdp = 10 * gdp / max_value("GDP")
     income_array = np.random.triangular(0.0, 0.75 * gdp, 2.5 * gdp, population)
     unemployment_rate = float(country_data["Unemployment"] / 100.0)
     employment_array = np.random.choice([True, False], population,
                                         p=[1 - unemployment_rate, unemployment_rate])
-    # TODO: Base this on fertility data.
     attachment_array = country_data["Fertility"] * np.random.triangular(0.0, 5.0, 10.0, population) / max_value("Fertility")
     # Calculate migration likelyhood based on the numbers generated above
     # S1
@@ -184,8 +199,7 @@ def generate_agents(country, start):
         "Employed": employment_array,
         "Attachment": attachment_array,
         "Location": [country] * population,
-        "Migration": (attachment_array) / 10.0
-        #"Migration": (attachment_array + conflict_score + income_score + unemployment_score) / 37.0
+        "Migration": (attachment_array + conflict_score + income_score + unemployment_score) / 37.0
     }, columns=world_columns)
     frame.index += start
     return frame
@@ -195,7 +209,6 @@ for country in df.index.tolist():
     start = df[df.index < country].Population.sum()
     end = start + df[df.index == country].to_dict("records")[0]["Population"]
     world[start:end] = generate_agents(country, start)
-    #world = world.append(generate_agents(country))
 # time_end = time.process_time()
 # print("Time: {}".format(time_end - time_start))
 
@@ -206,14 +219,21 @@ attractiveness =  ((1 - df["Conflict"] / max_value("Conflict")) +
                    1 - df["Fertility"] / max_value("Fertility"))
 
 print("Migrating...")
-# time_start = time.process_time()
-for country in countries:
-    local_attraction = attractiveness.copy()
-    local_attraction[local_attraction.index.isin(neighbors(country))] += 1
-    migrants = world.loc[(world.Migration > MIGRATION_THRESHOLD) & (world.Country == country)]["Location"]
-    sample = df.sample(n=migrants.size, weights=local_attraction, replace=True).index
-    world.ix[(world.Migration > MIGRATION_THRESHOLD) & (world.Country == country), "Location"] = sample
-    #migrants = sample
-# time_end = time.process_time()
-# print("Time: {}".format(time_end - time_start))
+world.Country = world.Country.astype('category')
+world.Location = world.Location.astype('category')
+# world = ddf.from_pandas(world, npartitions=80)
+
+def migrate(world):
+    for country, population in world[world.Migration > MIGRATION_THRESHOLD].groupby("Country"):
+        local_attraction = attractiveness.copy()
+        local_attraction[local_attraction.index.isin(neighbors(country))] += 1
+        #migrants = population.loc[(world.Migration > MIGRATION_THRESHOLD)]["Location"]
+        sample = df.sample(n=len(population), weights=local_attraction, replace=True).index
+        world.ix[(world.Migration > MIGRATION_THRESHOLD) & (world.Country == country), "Location"] = sample
+    return world
+
+# world = world.map_partitions(migrate, meta=world)
+world = migrate(world)
+# print((world.Location.value_counts() - world.Country.value_counts()).compute(get=get, num_workers=8).sort_values())
 print((world.Location.value_counts() - world.Country.value_counts()).sort_values())
+
