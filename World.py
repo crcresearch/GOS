@@ -55,5 +55,7 @@ mapper = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
 mapper.set_array(df_plot['value'])
 plt.colorbar(mapper, shrink=0.2)
 
+fig = plt.gcf()
+fig.savefig("Map.jpg")
+
 plt.show()
-# plt.savefig("Map.png")
