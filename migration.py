@@ -1,29 +1,21 @@
 import csv
+import datetime
 import numpy as np
 import pandas as pd
+import random
 import time
-import gc
-from multiprocessing import Pool
+from dask import array as da
+from dask import dataframe as ddf
+from dask.array import random as drand
 
 # The minimum size of a country (in population) to be added to the model.
 MIN_POPULATION = 1900000
-# Used to adjust the population.
-# The population the model uses will be approximately the global population
-# multiplied by POPULATION_SCALE.
-POPULATION_SCALE = 1 / 1000
-# Agents with a Migration score above this threshold will migrate.
+POPULATION_SCALE = 1 / 10_000
 MIGRATION_THRESHOLD = 0.75
-# Any income above this level multiplied by the country's GDP is brought
-# down to this level.
-BRAIN_DRAIN_THRESHOLD = 1.5
-# The number of processes to spawn of in multiprocessing.
-THREADS = 8
-# We need to pass pieces of the array to each process so it can do some work;
-# however, pieces that are too large cannot be passed. SPLITS determines how
-# arrays as subspliced to reduce their size.
-SPLITS = int(1000 * POPULATION_SCALE) if POPULATION_SCALE > 1 / 1000 else 1
+BRAIN_DRAIN_THRESHOLD = 1.0
+THREADS = 4
+CHUNKS = 1000
 
-# A dictionary with entries for each country.
 countries = {}
 
 def csv_path(name):
@@ -32,10 +24,6 @@ def csv_path(name):
     which contains the CSV data.
     """
     return "test_model/CountryData/CSVfiles/%s" % name
-
-## TODO: The process of reading in this data is rather similar for each
-## set of data. Would it be possible to create a function which simplifies
-## this an reduces the amount of redundancy?
 
 # Read population data.
 with open(csv_path("Population.csv")) as fh:
@@ -139,58 +127,71 @@ with open(csv_path("Mainconflicttable.csv")) as fh:
                     countries[country]["Conflict"] += score
 
 # At this point, all data has been imported and is currently stored in a dictionary.
-# We will now convert that data into a pandas dataframe.
-df = pd.DataFrame(countries).transpose().sort_values(["Population"], ascending=False)
-df[["Population"]] = df[["Population"]].apply(pd.to_numeric, downcast="unsigned")
-df[["Conflict", "Fertility", "GDP", "Unemployment"]] = df[["Conflict", "Fertility", "GDP", "Unemployment"]].apply(pd.to_numeric, downcast="float")
+# We will now convert that 
+
+df = pd.DataFrame(countries).transpose()
+dd = df[df.Unemployment.isnull()]
 
 # Some countries are missing data. We will guess this data using that of
 # neighboring countries.
+
+# Fill in unemployment data
 for i in range(2):
-    # Fill in unemployment data
     for item, frame in df[df.Unemployment.isnull()]["Neighbors"].iteritems():
         df.set_value(item, "Unemployment", df[df.index.isin(frame)]["Unemployment"].mean())
-    # Fill in conflict data
+# Fill in conflict data
+for i in range(2):
     for item, frame in df[df.Conflict.isnull()]["Neighbors"].iteritems():
         df.set_value(item, "Conflict", df[df.index.isin(frame)]["Conflict"].mean())
-    # Fill in fertility data
+# Fill in fertility data
+for i in range(2):
     for item, frame in df[df.Fertility.isnull()]["Neighbors"].iteritems():
         df.set_value(item, "Fertility", df[df.index.isin(frame)]["Fertility"].mean())
-    # Fill in GDP data
-    for item, frame in df[df.GDP.isnull()]["Neighbors"].iteritems():
-        df.set_value(item, "GDP", df[df.index.isin(frame)]["GDP"].mean())
 
 # Now we will generate our agents.
-world_columns = ["Country", "Income", "Employed", "Attachment", "Location", "Migration"]
+world_population = df["Population"].sum()
+model_population = world_population
+#world_columns = ["Country", "Income", "Employed", "Attachment", "Location", "Migration"]
+world_columns = ["Country", "Income"]
+#world = ddf.
+world = ddf.from_pandas(pd.DataFrame(index=range(1, model_population + 1), columns=world_columns), npartitions=THREADS)
 
 def max_value(attribute):
-    """
-    Get the maximum value for an attribute.
-    """
     return df[attribute].max()
 
 def neighbors(country):
-    """
-    Get the neighbors for a country.
-    """
     return df[df.index == country].iloc[0].Neighbors
 
-def generate_agents(country, population):
-    """
-    Generate a dataframe of agents for a country where population
-    is the number of agents to be created.
-    """
-    start = df[df.index < country].Population.sum()
+def generate_agents(country, start):
     country_data = df[df.index == country].to_dict("records")[0]
+    population = country_data["Population"]
     gdp = country_data["GDP"]
-    income_array = np.random.triangular(0.0, 0.75 * gdp, 2.5 * gdp, population).astype('float32')
+    income_array = drand.triangular(0.0, 0.75 * gdp, 2.5 * gdp, population, chunks=CHUNKS)
+    frame = pd.DataFrame({
+        "Country": [country] * population,
+        "Income": income_array
+        })
+    return frame
+
+for country in df.index.tolist():
+    start = df[df.index < country].Population.sum()
+    end = start + df[df.index == country].to_dict("records")[0]["Population"]
+    world[start:end] = generate_agents(country, start)
+"""
+def generate_agents(country, start):
+    country_data = df[df.index == country].to_dict("records")[0]
+    population = country_data["Population"]
+    gdp = country_data["GDP"]
+    #scaled_gdp = 10 * gdp / max_value("GDP")
+    income_array = np.random.triangular(0.0, 0.75 * gdp, 2.5 * gdp, population)
     unemployment_rate = float(country_data["Unemployment"] / 100.0)
     employment_array = np.random.choice([True, False], population,
                                         p=[1 - unemployment_rate, unemployment_rate])
-    attachment_array = (country_data["Fertility"] * np.random.triangular(0.0, 5.0, 10.0, population) / max_value("Fertility")).astype('float32')
+    # TODO: Base this on fertility data.
+    attachment_array = country_data["Fertility"] * np.random.triangular(0.0, 5.0, 10.0, population) / max_value("Fertility")
     # Calculate migration likelyhood based on the numbers generated above
     # S1
-    conflict_score = pd.Series([10 * country_data["Conflict"] / max_value("Conflict")] * population).astype('float32')
+    conflict_score = pd.Series([10 * country_data["Conflict"] / max_value("Conflict")] * population)
     # S2
     income_score = pd.Series(income_array)
     income_score.ix[income_score >= BRAIN_DRAIN_THRESHOLD * country_data["GDP"]] = country_data["GDP"]
@@ -199,61 +200,44 @@ def generate_agents(country, population):
     income_score += 1
     income_score *= 10
     unemployment_score = 7 - employment_array * 4
+    
     frame =  pd.DataFrame({
-        "Country": pd.Categorical([country] * population, list(countries)),
+        "Country": [country] * population,
         "Income": income_array,
-        "Employed": employment_array.astype('bool'),
+        "Employed": employment_array,
         "Attachment": attachment_array,
         "Location": [country] * population,
-        "Migration": ((attachment_array + conflict_score + income_score + unemployment_score) / 37.0).astype('float32'),
+        "Migration": (attachment_array) / 10.0
+        #"Migration": (attachment_array + conflict_score + income_score + unemployment_score) / 37.0
     }, columns=world_columns)
     frame.index += start
     return frame
 
-def create_agents(array):
-    """
-    Returns a dataframe with all agents in the model.
-    """
-    return pd.concat([generate_agents(country, len(population)) for country, population in array.groupby(array)])
+# time_start = time.process_time()
+for country in df.index.tolist():
+    start = df[df.index < country].Population.sum()
+    end = start + df[df.index == country].to_dict("records")[0]["Population"]
+    world[start:end] = generate_agents(country, start)
+    #world = world.append(generate_agents(country))
+# time_end = time.process_time()
+# print("Time: {}".format(time_end - time_start))
 
-country_array = pd.concat([pd.Series([c] * k["Population"]) for c, k in countries.items()])
-country_array.index = range(len(country_array))
-# Garbage collect before creating new processes.
-gc.collect()
-with Pool(THREADS) as p:
-    world = pd.concat(p.map(create_agents, np.array_split(country_array, THREADS * SPLITS)))
-    p.close()
-    p.join()
-
-world.Location = pd.Categorical(world["Location"], list(world[world.Migration > MIGRATION_THRESHOLD]["Country"].value_counts().index))
 # Calculate attractiveness to migrants for each country.
 attractiveness =  ((1 - df["Conflict"] / max_value("Conflict")) +
                    df["GDP"] / max_value("GDP") +
                    1 - df["Unemployment"] / max_value("Unemployment") +
                    1 - df["Fertility"] / max_value("Fertility"))
 
-migration_map = {}
-for country in countries.keys():
+print("Migrating...")
+# time_start = time.process_time()
+for country in countries:
     local_attraction = attractiveness.copy()
     local_attraction[local_attraction.index.isin(neighbors(country))] += 1
-    migration_map[country] = local_attraction
-
-print("Migrating...")
-
-def migrate_array(a):
-    for country, population in a.groupby("Location"):
-        for index, row in population.iterrows():
-            local_attraction = migration_map[country]
-            a.loc[index, "Location"] = df.sample(weights=local_attraction).index[0]
-    return a
-
-# Garbage collect before creating new processes.
-gc.collect()
-with Pool(THREADS) as p:
-    g = pd.concat(p.map(migrate_array,
-                        np.array_split(world[world.Migration > MIGRATION_THRESHOLD],
-                                       THREADS * SPLITS)))
-    p.close()
-    p.join()
-world = pd.concat([world, g], copy=False)
+    migrants = world.loc[(world.Migration > MIGRATION_THRESHOLD) & (world.Country == country)]["Location"]
+    sample = df.sample(n=migrants.size, weights=local_attraction, replace=True).index
+    world.ix[(world.Migration > MIGRATION_THRESHOLD) & (world.Country == country), "Location"] = sample
+    #migrants = sample
+# time_end = time.process_time()
+# print("Time: {}".format(time_end - time_start))
 print((world.Location.value_counts() - world.Country.value_counts()).sort_values())
+"""
