@@ -7,7 +7,7 @@ def csv_path(name):
     Shortcut function to get the relative path to the directory
     which contains the CSV data.
     """
-    return "../test_model/CountryData/CSVfiles/%s" % name
+    return "./data/%s" % name
 
 def population():
     """
