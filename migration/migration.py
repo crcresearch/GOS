@@ -25,26 +25,14 @@ def generate_agents(df, country, population):
     unemployment_rate = float(country_data["Unemployment"] / 100.0)
     employment_array = np.random.choice([True, False], population,
                                     p=[1 - unemployment_rate, unemployment_rate])
-    attachment_array = (country_data["Fertility"] * np.random.triangular(0.0, 5.0, 10.0, population) / max_value("Fertility")).astype('float32')
-    # Calculate migration likelyhood based on the numbers generated above
-    # S1
-    #conflict_score = pd.Series([10 * country_data["Conflict"] / max_value("Conflict")] * population).astype('float32')
-    conflict_score = pd.Series([10 * np.log(1 + country_data["Conflict"]) / math.log(max_value("Conflict"))] * population).astype('float32')
-    # S2
-    income_score = income_array
-    # TODO: What is the "brain drain" doing?
-    #income_score.ix[income_score >= BRAIN_DRAIN_THRESHOLD * country_data["GDP"]] = country_data["GDP"]
-    income_score /= -max_value("GDP")
-    income_score += 1
-    income_score *= 10
-    unemployment_score = 7 - employment_array * 4
+    attachment_array = (country_data["Fertility"] * np.random.triangular(0.0, 0.5, 1.0, population) / max_value("Fertility")).astype('float32')
     frame =  pd.DataFrame({
         "Country": pd.Categorical([country] * population, list(df.index)),
         "Income": income_array,
         "Employed": employment_array.astype('bool'),
         "Attachment": attachment_array,
         "Location": pd.Categorical([country] * population, list(df.index)),
-        "Migration": ((attachment_array + conflict_score + income_score + unemployment_score) / 37.0).astype('float32'),
+        "Migration": 0,
     }, columns=world_columns)
     frame.index += start
     return frame
@@ -59,21 +47,30 @@ def migrate_array(a, **kwargs):
         a.loc[a.Migration > MIGRATION_THRESHOLD, "Location"] = np.random.choice(countries, p=local_attraction, size=len(migrants), replace=True)
     return a
 
+def calculate_migration(a, **kwargs):
+    conflict = kwargs["conflict_scores"]
+    max_income = kwargs["max_income"]
+    for country, population in a.groupby("Location"):
+        a.loc[a.Country == country, "Migration"] = (
+            (10 * (1 + population["Income"] / -max_income) +
+             10 * population["Attachment"] +
+             5 * (conflict[country] / conflict.max()) +
+             (population["Employed"] * 4 + 3)) / 32).astype('float32')
+    return a
 
 def main():
     globe = gos.Globe(data.all(), threads=THREADS, splits=SPLITS)
 
     globe.create_agents(generate_agents)
 
-    attractiveness = ((1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
-                      globe.df["GDP"] / globe.max_value("GDP") +
-                      1 - globe.df["Unemployment"] / globe.max_value("Unemployment") +
-                      1 - globe.df["Fertility"] / globe.max_value("Fertility"))
+    globe.run(calculate_migration, conflict_scores=globe.df.Conflict, max_income=globe.agents.Income.max())
+
+    attractiveness = (5 * (1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
+                      10 * (globe.df["GDP"] / globe.max_value("GDP")) +
+                      7 * (1 - globe.df["Unemployment"] / globe.max_value("Unemployment")) +
+                      10 * (1 - globe.df["Fertility"] / globe.max_value("Fertility")))
 
     def neighbors(country):
-        """
-        Get the neighbors for a country.
-        """
         return globe.df[globe.df.index == country].iloc[0].neighbors
 
     migration_map = {}
@@ -84,7 +81,17 @@ def main():
 
     globe.run(migrate_array, migration_map=migration_map, countries=globe.df.index)
 
-    print((globe.agents.Location.value_counts() - globe.agents.Country.value_counts()).sort_values())
+    #pd.options.display.max_rows = 150
+    print("Migration model completed at a scale of {}:1.".format(int(1 / POPULATION_SCALE)))
+    migrants = globe.agents[globe.agents.Country != globe.agents.Location]
+    print("There were a total of {} migrants.".format(len(migrants)))
+    changes = (globe.agents.Location.value_counts() - globe.agents.Country.value_counts()).sort_values()
+    print(changes.head())
+    print(changes.tail())
+    
+    print("The migrants came from")
+    print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])
+
     return globe
 
 if __name__ == "__main__":
