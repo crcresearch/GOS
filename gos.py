@@ -30,7 +30,7 @@ class Globe:
         # Garbage collect before creating new processes.
         gc.collect()
         with Pool(self.threads) as p:
-            self.agents = pd.concat(p.map(self._gen_agents, np.array_split(country_array, self.threads * self.splits)))
+            self.agents = pd.concat(p.imap_unordered(self._gen_agents, np.array_split(country_array, self.threads * self.splits)))
             p.close()
             p.join()
 
@@ -38,8 +38,8 @@ class Globe:
         # Garbage collect before creating new processes.
         gc.collect()
         with Pool(self.threads) as p:
-            self.agents = pd.concat(p.map(partial(function, **kwargs),
-                                          np.array_split(self.agents,
-                                                         self.threads * self.splits)))
+            self.agents = pd.concat(p.imap_unordered(partial(function, **kwargs),
+                                                     np.array_split(self.agents,
+                                                                    self.threads * self.splits)))
             p.close()
             p.join()
