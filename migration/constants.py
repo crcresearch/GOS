@@ -9,7 +9,7 @@ MIN_POPULATION = 1900000
 POPULATION_SCALE = 1 / 1000
 
 # Agents with a Migration score above this threshold will migrate.
-MIGRATION_THRESHOLD = 0.75
+MIGRATION_THRESHOLD = 0.8
 
 # Any income above this level multiplied by the country's GDP is brought
 # down to this level.
