@@ -26,6 +26,18 @@ def generate_agents(df, country, population):
     employment_array = np.random.choice([True, False], population,
                                     p=[1 - unemployment_rate, unemployment_rate])
     attachment_array = (country_data["Fertility"] * np.random.triangular(0.0, 0.5, 1.0, population) / max_value("Fertility")).astype('float32')
+    # Calculate migration likelyhood based on the numbers generated above
+    # S1
+    #conflict_score = pd.Series([10 * country_data["Conflict"] / max_value("Conflict")] * population).astype('float32')
+    conflict_score = pd.Series([10 * np.log(1 + country_data["Conflict"]) / math.log(max_value("Conflict"))] * population).astype('float32')
+    # S2
+    income_score = income_array
+    # TODO: What is the "brain drain" doing?
+    #income_score.ix[income_score >= BRAIN_DRAIN_THRESHOLD * country_data["GDP"]] = country_data["GDP"]
+    income_score /= -max_value("GDP")
+    income_score += 1
+    income_score *= 10
+    unemployment_score = 7 - employment_array * 4
     frame =  pd.DataFrame({
         "Country": pd.Categorical([country] * population, list(df.index)),
         "Income": income_array,
@@ -71,6 +83,9 @@ def main():
                       10 * (1 - globe.df["Fertility"] / globe.max_value("Fertility")))
 
     def neighbors(country):
+        """
+        Get the neighbors for a country.
+        """
         return globe.df[globe.df.index == country].iloc[0].neighbors
 
     migration_map = {}
@@ -81,17 +96,14 @@ def main():
 
     globe.run(migrate_array, migration_map=migration_map, countries=globe.df.index)
 
-    #pd.options.display.max_rows = 150
     print("Migration model completed at a scale of {}:1.".format(int(1 / POPULATION_SCALE)))
     migrants = globe.agents[globe.agents.Country != globe.agents.Location]
     print("There were a total of {} migrants.".format(len(migrants)))
     changes = (globe.agents.Location.value_counts() - globe.agents.Country.value_counts()).sort_values()
     print(changes.head())
     print(changes.tail())
-    
     print("The migrants came from")
     print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])
-
     return globe
 
 if __name__ == "__main__":
