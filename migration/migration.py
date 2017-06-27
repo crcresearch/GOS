@@ -38,13 +38,15 @@ def generate_agents(df, country, population):
     return frame
 
 def migrate_array(a, **kwargs):
+    if len(a[a.Migration > MIGRATION_THRESHOLD]) == 0:
+        return a
     migration_map = kwargs["migration_map"]
     countries = kwargs["countries"]
     for country, population in a.groupby("Location"):
         local_attraction = migration_map[country]
         local_attraction /= local_attraction.sum()
-        migrants = a[a.Migration > MIGRATION_THRESHOLD]
-        a.loc[a.Migration > MIGRATION_THRESHOLD, "Location"] = np.random.choice(countries, p=local_attraction, size=len(migrants), replace=True)
+        migrants_num = len(population[population.Migration > MIGRATION_THRESHOLD])
+        a.loc[(a.Country == country) & (a.Migration > MIGRATION_THRESHOLD), "Location"] = np.random.choice(countries, p=local_attraction, size=migrants_num, replace=True)
     return a
 
 def calculate_migration(a, **kwargs):
@@ -65,10 +67,10 @@ def main():
 
     globe.run(calculate_migration, conflict_scores=globe.df.Conflict, max_income=globe.agents.Income.max())
 
-    attractiveness = (5 * (1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
-                      10 * (globe.df["GDP"] / globe.max_value("GDP")) +
-                      7 * (1 - globe.df["Unemployment"] / globe.max_value("Unemployment")) +
-                      10 * (1 - globe.df["Fertility"] / globe.max_value("Fertility")))
+    attractiveness = ((1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
+                      (globe.df["GDP"] / globe.max_value("GDP")) +
+                      (1 - globe.df["Unemployment"] / globe.max_value("Unemployment")) +
+                      (1 - globe.df["Fertility"] / globe.max_value("Fertility")))
 
     def neighbors(country):
         return globe.df[globe.df.index == country].iloc[0].neighbors
@@ -81,7 +83,6 @@ def main():
 
     globe.run(migrate_array, migration_map=migration_map, countries=globe.df.index)
 
-    #pd.options.display.max_rows = 150
     print("Migration model completed at a scale of {}:1.".format(int(1 / POPULATION_SCALE)))
     migrants = globe.agents[globe.agents.Country != globe.agents.Location]
     print("There were a total of {} migrants.".format(len(migrants)))
@@ -91,7 +92,6 @@ def main():
     
     print("The migrants came from")
     print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])
-
     return globe
 
 if __name__ == "__main__":
