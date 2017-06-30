@@ -39,7 +39,7 @@ def generate_agents(df, country, population):
 
 def migrate_array(a, **kwargs):
     if len(a[a.Migration > MIGRATION_THRESHOLD]) == 0:
-        return a
+        return a.Location
     migration_map = kwargs["migration_map"]
     countries = kwargs["countries"]
     for country, population in a.groupby("Location"):
@@ -47,7 +47,7 @@ def migrate_array(a, **kwargs):
         local_attraction /= local_attraction.sum()
         migrants_num = len(population[population.Migration > MIGRATION_THRESHOLD])
         a.loc[(a.Country == country) & (a.Migration > MIGRATION_THRESHOLD), "Location"] = np.random.choice(countries, p=local_attraction, size=migrants_num, replace=True)
-    return a
+    return a.Location
 
 def migrate_score(income, attachment, employed, conflict):
     return np.array(((10 * (1 + income / -np.max(income)) +
@@ -78,7 +78,7 @@ def main():
         local_attraction[local_attraction.index.isin(neighbors(country))] += 1
         migration_map[country] = local_attraction
 
-    globe.run(migrate_array, migration_map=migration_map, countries=globe.df.index)
+    globe.agents["Location"] = globe.run(migrate_array, migration_map=migration_map, countries=globe.df.index)
 
     print("Migration model completed at a scale of {}:1.".format(int(1 / POPULATION_SCALE)))
     migrants = globe.agents[globe.agents.Country != globe.agents.Location]
