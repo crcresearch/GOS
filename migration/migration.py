@@ -17,7 +17,7 @@ def generate_agents(df, country, population):
     """
     def max_value(attribute):
         return df[attribute].max()
-    
+
     start = df[df.index < country].Population.sum()
     country_data = df[df.index == country].to_dict("records")[0]
     gdp = country_data["GDP"]
@@ -49,23 +49,20 @@ def migrate_array(a, **kwargs):
         a.loc[(a.Country == country) & (a.Migration > MIGRATION_THRESHOLD), "Location"] = np.random.choice(countries, p=local_attraction, size=migrants_num, replace=True)
     return a
 
-def calculate_migration(a, **kwargs):
-    conflict = kwargs["conflict_scores"]
-    max_income = kwargs["max_income"]
-    for country, population in a.groupby("Location"):
-        a.loc[a.Country == country, "Migration"] = (
-            (10 * (1 + population["Income"] / -max_income) +
-             10 * population["Attachment"] +
-             5 * (conflict[country] / conflict.max()) +
-             (population["Employed"] * 4 + 3)) / 32).astype('float32')
-    return a
+def migrate_score(income, attachment, employed, conflict):
+    return np.array(((10 * (1 + income / -np.max(income)) +
+                      10 * attachment +
+                      (5 * conflict / np.max(conflict)) +
+                      3 + employed * 4)
+                     / 32), dtype='float32')
 
 def main():
     globe = gos.Globe(data.all(), threads=THREADS, splits=SPLITS)
 
     globe.create_agents(generate_agents)
 
-    globe.run(calculate_migration, conflict_scores=globe.df.Conflict, max_income=globe.agents.Income.max())
+    conflict_values = globe.df[["Conflict"]].merge(globe.agents, left_index=True, right_on='Country')["Conflict"].values
+    globe.agents.Migration = migrate_score(globe.agents.Income.values, globe.agents.Attachment.values, globe.agents.Employed.values, conflict_values)
 
     attractiveness = ((1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
                       (globe.df["GDP"] / globe.max_value("GDP")) +
@@ -90,7 +87,8 @@ def main():
     print(changes.head())
     print(changes.tail())
     
-    print("The migrants came from")
+    print("The potential migrants came from")
+    migrants = globe.agents[globe.agents.Migration > MIGRATION_THRESHOLD]
     print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])
     return globe
 
