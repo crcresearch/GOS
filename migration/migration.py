@@ -49,7 +49,7 @@ def migrate_array(a, **kwargs):
         a.loc[(a.Country == country) & (a.Migration > MIGRATION_THRESHOLD), "Location"] = np.random.choice(countries, p=local_attraction, size=migrants_num, replace=True)
     return a.Location
 
-def ms(a, **kwargs):
+def migrate_score(a, **kwargs):
     max_income = kwargs["max_income"]
     conflict_scores = kwargs["conflict"]
     max_conflict = kwargs["max_conflict"]
@@ -60,20 +60,13 @@ def ms(a, **kwargs):
              3 + a.Employed * 4)
             / 32).astype('float32')
 
-def migrate_score(income, attachment, employed, conflict):
-    return np.array(((10 * (1 + income / -np.max(income)) +
-                      10 * attachment +
-                      (5 * conflict / np.max(conflict)) +
-                      3 + employed * 4)
-                     / 32), dtype='float32')
-
 def main():
     np.random.seed(0)
     globe = gos.Globe(data.all(), threads=THREADS, splits=SPLITS)
 
     globe.create_agents(generate_agents)
 
-    globe.agents.Migration = globe.run(ms, max_income=globe.agents.Income.max(),
+    globe.agents.Migration = globe.run(migrate_score, max_income=globe.agents.Income.max(),
                                        conflict=globe.df[["Conflict"]],
                                        max_conflict=globe.df.Conflict.max())
 
