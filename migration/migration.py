@@ -17,7 +17,7 @@ def generate_agents(df, country, population):
     """
     def max_value(attribute):
         return df[attribute].max()
-    
+
     start = df[df.index < country].Population.sum()
     country_data = df[df.index == country].to_dict("records")[0]
     gdp = country_data["GDP"]
@@ -39,7 +39,7 @@ def generate_agents(df, country, population):
 
 def migrate_array(a, **kwargs):
     if len(a[a.Migration > MIGRATION_THRESHOLD]) == 0:
-        return a
+        return a.Location
     migration_map = kwargs["migration_map"]
     countries = kwargs["countries"]
     for country, population in a.groupby("Location"):
@@ -47,25 +47,28 @@ def migrate_array(a, **kwargs):
         local_attraction /= local_attraction.sum()
         migrants_num = len(population[population.Migration > MIGRATION_THRESHOLD])
         a.loc[(a.Country == country) & (a.Migration > MIGRATION_THRESHOLD), "Location"] = np.random.choice(countries, p=local_attraction, size=migrants_num, replace=True)
-    return a
+    return a.Location
 
-def calculate_migration(a, **kwargs):
-    conflict = kwargs["conflict_scores"]
+def migrate_score(a, **kwargs):
     max_income = kwargs["max_income"]
-    for country, population in a.groupby("Location"):
-        a.loc[a.Country == country, "Migration"] = (
-            (10 * (1 + population["Income"] / -max_income) +
-             10 * population["Attachment"] +
-             5 * (conflict[country] / conflict.max()) +
-             (population["Employed"] * 4 + 3)) / 32).astype('float32')
-    return a
+    conflict_scores = kwargs["conflict"]
+    max_conflict = kwargs["max_conflict"]
+    conflict = conflict_scores.merge(a, left_index=True, right_on='Country')["Conflict"] / max_conflict
+    return ((10 * (1 + a.Income / -max_income) +
+             10 * a.Attachment +
+             (5 * conflict) +
+             3 + a.Employed * 4)
+            / 32).astype('float32')
 
 def main():
+    np.random.seed(0)
     globe = gos.Globe(data.all(), threads=THREADS, splits=SPLITS)
 
     globe.create_agents(generate_agents)
 
-    globe.run(calculate_migration, conflict_scores=globe.df.Conflict, max_income=globe.agents.Income.max())
+    globe.agents.Migration = globe.run(migrate_score, max_income=globe.agents.Income.max(),
+                                       conflict=globe.df[["Conflict"]],
+                                       max_conflict=globe.df.Conflict.max())
 
     attractiveness = ((1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
                       (globe.df["GDP"] / globe.max_value("GDP")) +
@@ -81,7 +84,7 @@ def main():
         local_attraction[local_attraction.index.isin(neighbors(country))] += 1
         migration_map[country] = local_attraction
 
-    globe.run(migrate_array, migration_map=migration_map, countries=globe.df.index)
+    globe.agents["Location"] = globe.run(migrate_array, migration_map=migration_map, countries=globe.df.index)
 
     print("Migration model completed at a scale of {}:1.".format(int(1 / POPULATION_SCALE)))
     migrants = globe.agents[globe.agents.Country != globe.agents.Location]
@@ -90,7 +93,8 @@ def main():
     print(changes.head())
     print(changes.tail())
     
-    print("The migrants came from")
+    print("The potential migrants came from")
+    migrants = globe.agents[globe.agents.Migration > MIGRATION_THRESHOLD]
     print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])
     return globe
 
