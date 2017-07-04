@@ -53,7 +53,7 @@ def migrate_score(a, **kwargs):
     max_income = kwargs["max_income"]
     conflict_scores = kwargs["conflict"]
     max_conflict = kwargs["max_conflict"]
-    conflict = conflict_scores.merge(a, left_index=True, right_on='Country')["Conflict"] / max_conflict
+    conflict = conflict_scores.merge(a, left_index=True, right_on='Location')["Conflict"] / max_conflict
     return ((10 * (1 + a.Income / -max_income) +
              10 * a.Attachment +
              (5 * conflict) +
@@ -68,7 +68,8 @@ def main():
 
     globe.agents.Migration = globe.run(migrate_score, max_income=globe.agents.Income.max(),
                                        conflict=globe.df[["Conflict"]],
-                                       max_conflict=globe.df.Conflict.max())
+                                       max_conflict=globe.df.Conflict.max(),
+                                       columns=["Income", "Employed", "Attachment", "Location"])
 
     attractiveness = ((1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
                       (globe.df["GDP"] / globe.max_value("GDP")) +
@@ -84,7 +85,9 @@ def main():
         local_attraction[local_attraction.index.isin(neighbors(country))] += 1
         migration_map[country] = local_attraction
 
-    globe.agents["Location"] = globe.run(migrate_array, migration_map=migration_map, countries=globe.df.index)
+    globe.agents["Location"] = globe.run(migrate_array, migration_map=migration_map,
+                                         countries=globe.df.index,
+                                         columns=["Country", "Location", "Migration"])
 
     print("Migration model completed at a scale of {}:1.".format(int(1 / POPULATION_SCALE)))
     migrants = globe.agents[globe.agents.Country != globe.agents.Location]
