@@ -8,6 +8,7 @@ import gc
 from multiprocessing import Pool, cpu_count
 from functools import partial
 
+
 class Globe:
     def __init__(self, df, threads=cpu_count() - 1, splits=1):
         self.df = df
@@ -27,7 +28,11 @@ class Globe:
         return self.df[attribute].max()
 
     def _gen_agents(self, array):
-        return pd.concat([self.generator(self.df, country, len(population)) for country, population in array.groupby(array)])
+        return pd.concat(
+            [self.generator(self.df, country, len(population))
+             for country, population
+             in array.groupby(array)]
+        )
 
     def create_agents(self, generator):
         self.generator = generator
@@ -35,7 +40,10 @@ class Globe:
         country_array.index = range(len(country_array))
         # Garbage collect before creating new processes.
         gc.collect()
-        self.agents = pd.concat(self.pool.imap(self._gen_agents, np.array_split(country_array, self.threads * self.splits)))#.sort_index()
+        self.agents = pd.concat(
+            self.pool.imap(self._gen_agents,
+                           np.array_split(country_array, self.threads * self.splits))
+        )
 
     def run(self, function, **kwargs):
         columns = kwargs["columns"] if "columns" in kwargs else self.agents.columns
