@@ -38,8 +38,9 @@ class Globe:
         self.agents = pd.concat(self.pool.imap(self._gen_agents, np.array_split(country_array, self.threads * self.splits)))#.sort_index()
 
     def run(self, function, **kwargs):
+        columns = kwargs["columns"] if "columns" in kwargs else self.agents.columns
         # Garbage collect before creating new processes.
         gc.collect()
         return pd.concat(self.pool.imap(partial(function, **kwargs),
-                                        np.array_split(self.agents,
+                                        np.array_split(self.agents[columns],
                                                        self.threads * self.splits)))
