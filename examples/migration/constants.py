@@ -16,7 +16,7 @@ MIGRATION_THRESHOLD = 0.7825
 BRAIN_DRAIN_THRESHOLD = 1.5
 
 # The number of processes to spawn of in multiprocessing.
-THREADS = cpu_count() - 1
+PROCESSES = cpu_count() - 1
 
 # We need to pass pieces of the array to each process so it can do some work;
 # however, pieces that are too large cannot be passed. SPLITS determines how

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from migration.constants import MIN_POPULATION, POPULATION_SCALE
+from constants import MIN_POPULATION, POPULATION_SCALE
 
 
 def csv_path(name):
@@ -8,7 +8,7 @@ def csv_path(name):
     Shortcut function to get the relative path to the directory
     which contains the CSV data.
     """
-    return "./migration/data/%s" % name
+    return "./data/%s" % name
 
 
 def population():

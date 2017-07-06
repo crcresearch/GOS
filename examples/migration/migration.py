@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
-from migration import data
-from migration.constants import POPULATION_SCALE, MIGRATION_THRESHOLD
-from migration.constants import THREADS, SPLITS
-import gos
+import data
+from constants import POPULATION_SCALE, MIGRATION_THRESHOLD, PROCESSES, SPLITS
+from gos import Globe
 
 # The attributes for each agent.
 world_columns = ["Country", "Income", "Employed", "Attachment", "Location", "Migration"]
@@ -70,14 +69,14 @@ def migrate_score(a, **kwargs):
 
 def main():
     np.random.seed(0)
-    globe = gos.Globe(data.all(), threads=THREADS, splits=SPLITS)
+    globe = Globe(data.all(), processes=PROCESSES, splits=SPLITS)
 
     globe.create_agents(generate_agents)
 
-    globe.agents.Migration = globe.run(migrate_score, max_income=globe.agents.Income.max(),
-                                       conflict=globe.df[["Conflict"]],
-                                       max_conflict=globe.df.Conflict.max(),
-                                       columns=["Income", "Employed", "Attachment", "Location"])
+    globe.agents.Migration = globe.run_par(migrate_score, max_income=globe.agents.Income.max(),
+                                           conflict=globe.df[["Conflict"]],
+                                           max_conflict=globe.df.Conflict.max(),
+                                           columns=["Income", "Employed", "Attachment", "Location"])
 
     attractiveness = ((1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
                       (globe.df["GDP"] / globe.max_value("GDP")) +
@@ -93,9 +92,9 @@ def main():
         local_attraction[local_attraction.index.isin(neighbors(country))] += 1
         migration_map[country] = local_attraction
 
-    globe.agents["Location"] = globe.run(migrate_array, migration_map=migration_map,
-                                         countries=globe.df.index,
-                                         columns=["Country", "Location", "Migration"])
+    globe.agents["Location"] = globe.run_par(migrate_array, migration_map=migration_map,
+                                             countries=globe.df.index,
+                                             columns=["Country", "Location", "Migration"])
 
     print("Migration model completed at a scale of {}:1.".format(int(1 / POPULATION_SCALE)))
     migrants = globe.agents[globe.agents.Country != globe.agents.Location]
