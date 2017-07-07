@@ -25,5 +25,9 @@ They can both be installed using pip:
 
     pip install numpy pandas
 
-Setup
------
+GOS is designed to run on Python 3.
+
+.. Setup
+   -----
+
+   GOS is specifically designed to be run in Jupyter.
