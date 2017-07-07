@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-from constants import *
+from constants import MIN_POPULATION, POPULATION_SCALE
+
 
 def csv_path(name):
     """
@@ -8,6 +9,7 @@ def csv_path(name):
     which contains the CSV data.
     """
     return "./data/%s" % name
+
 
 def population():
     """
@@ -19,20 +21,23 @@ def population():
     pop_csv["Population"] = (pop_csv["Population"] * POPULATION_SCALE).astype("uint32")
     return pop_csv
 
+
 def gdp():
     """
     Read the GDP for each country.
     """
-    gdp_csv = pd.read_csv(csv_path("UN_GDP.csv"), index_col=0, usecols=[0,3],
+    gdp_csv = pd.read_csv(csv_path("UN_GDP.csv"), index_col=0, usecols=[0, 3],
                           dtype={"Value": np.float32})
     gdp_csv.columns = ["GDP"]
     return gdp_csv
+
 
 def employment():
     """
     Read the unemployment for each country.
     """
-    return pd.read_csv(csv_path("CIA_Unemployment.csv"), index_col=0, usecols=[1,2])
+    return pd.read_csv(csv_path("CIA_Unemployment.csv"), index_col=0, usecols=[1, 2])
+
 
 # This is a dictionary used to translate names that do not the ones used elsewhere.
 # TODO: Use ISO3 codes for each country and map their names to their codes using a CSV.
@@ -64,7 +69,6 @@ alt_names = {
     "Yemen, Rep.": "Yemen",
     "Venezuela, RB": "Venezuela",
     "Syrian Arab Republic": "Syria",
-    "Korea, Rep.": "Korea",
     "Slovak Republic": "Slovakia",
     "Russian Federation": "Russia",
     "Korea, Rep.": "South Korea",
@@ -75,28 +79,29 @@ alt_names = {
     "Iran, Islamic Rep.": "Iran"
 }
 
+
 def conflict():
     """
     Read and calculate conflict scores for each country.
     """
-    conflict_csv = pd.read_csv(csv_path("ucdp-prio-acd-4-2016.csv"), usecols=[0,1,9,10])
+    conflict_csv = pd.read_csv(csv_path("ucdp-prio-acd-4-2016.csv"), usecols=[0, 1, 9, 10])
     conflict_csv["Location"] = conflict_csv["Location"].str.split(', ')
     conflict_csv["Location"] = conflict_csv["Location"].map(
         lambda y: [alt_names[x].strip() if x in alt_names else x for x in y])
-    conflict_csv["Conflict"] = (conflict_csv["Year"] - 1946) / 10 * conflict_csv["IntensityLevel"] ** 2
-    conflict_data = pd.DataFrame(conflict_csv.Location.tolist(),
-                                 index=conflict_csv.Conflict).stack().reset_index(
-                                     level=1, drop=True
-                                 ).reset_index(name='Location')[
-                                     ['Location','Conflict']
-                                 ].groupby("Location").sum()
+    conflict_csv["Conflict"] = ((conflict_csv["Year"] - 1946) / 10 *
+                                conflict_csv["IntensityLevel"] ** 2)
+    conflict_data = (pd.DataFrame(conflict_csv.Location.tolist(), index=conflict_csv.Conflict)
+                     .stack().reset_index(level=1, drop=True)
+                     .reset_index(name='Location')[['Location', 'Conflict']]
+                     .groupby("Location").sum())
     return conflict_data
+
 
 def neighbors():
     """
     Read the neighbors for each country.
     """
-    neighbors_csv = pd.read_csv(csv_path("Neighbors.csv"), usecols=[0,2,4], index_col=1)
+    neighbors_csv = pd.read_csv(csv_path("Neighbors.csv"), usecols=[0, 2, 4], index_col=1)
     neighbors_csv["neighbors"] = neighbors_csv["neighbors"].str.split()
     neighbors_csv["neighbors"] = neighbors_csv["neighbors"].map(
         lambda x: [item for sublist in
@@ -117,31 +122,41 @@ def neighbors():
     neighbors_csv["neighbors"]["Cuba"] = ["Jamaica", "Dominican Republic"]
     neighbors_csv["neighbors"]["Sri Lanka"] = ["India"]
     neighbors_csv["neighbors"]["France"] = ["Germany", "Switzerland", "Italy", "Belgium",
-                                        "Luxembourg", "Spain", "Andorra"]
+                                            "Luxembourg", "Spain", "Andorra"]
     return neighbors_csv
+
 
 def fertility():
     """
     Read the fertiltiy rate for each country.
     """
-    fertility_csv = pd.read_csv(csv_path("attachment.csv"), usecols=[1,7], index_col=0)
+    fertility_csv = pd.read_csv(csv_path("attachment.csv"), usecols=[1, 7], index_col=0)
     fertility_csv.columns = ["Fertility"]
     return fertility_csv
+
 
 def net_migration():
     """
     Read net migration for all countries from 2007-2012.
     """
-    net = pd.read_csv(csv_path("API_SM.POP.NETM_DS2_en_csv_v2.csv"), usecols=[0,56], header=2, index_col=0).dropna()
+    net = pd.read_csv(csv_path("API_SM.POP.NETM_DS2_en_csv_v2.csv"),
+                      usecols=[0, 56], header=2, index_col=0).dropna()
     net.columns = ["Net Migration"]
     net.index = net.index.map(lambda x: alt_names[x] if x in alt_names else x)
     return net
+
 
 def all(fill_nan=True):
     """
     Join all data into a single DataFrame.
     """
-    df = population().join(gdp()).join(employment()).join(conflict()).join(neighbors()).join(fertility()).join(net_migration())
+    df = (population()
+          .join(gdp())
+          .join(employment())
+          .join(conflict())
+          .join(neighbors())
+          .join(fertility())
+          .join(net_migration()))
     if not fill_nan:
         return df
     # Some countries are missing data. We will guess this data using that of
