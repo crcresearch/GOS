@@ -3,6 +3,10 @@ import pandas as pd
 from constants import MIN_POPULATION, POPULATION_SCALE
 
 
+COUNTRY_COLS = ["Population", "GDP", "Unemployment", "Conflict",
+                "Fertility", "FullName", "neighbors"]
+
+
 def csv_path(name):
     """
     Shortcut function to get the relative path to the directory
@@ -11,13 +15,24 @@ def csv_path(name):
     return "./data/%s" % name
 
 
+def country_codes():
+    """
+    Read country names and ISO codes.
+    """
+    return (pd.read_csv(csv_path("country-codes.csv"), usecols=[1, 3, 4],
+                        index_col=2, keep_default_na=False))
+
+
+def codemap():
+    return pd.read_csv(csv_path("names_to_codes.csv"))
+
+
 def population():
     """
     Read the population for each country.
     """
     pop_csv = pd.read_csv(csv_path("Population.csv"), thousands=',', index_col=0,
                           dtype={"Population": np.uint32})
-    pop_csv = pop_csv[pop_csv["Population"] > MIN_POPULATION]
     pop_csv["Population"] = (pop_csv["Population"] * POPULATION_SCALE).astype("uint32")
     return pop_csv
 
@@ -101,28 +116,22 @@ def neighbors():
     """
     Read the neighbors for each country.
     """
-    neighbors_csv = pd.read_csv(csv_path("Neighbors.csv"), usecols=[0, 2, 4], index_col=1)
-    neighbors_csv["neighbors"] = neighbors_csv["neighbors"].str.split()
-    neighbors_csv["neighbors"] = neighbors_csv["neighbors"].map(
-        lambda x: [item for sublist in
-                   [neighbors_csv[neighbors_csv.iso_alpha2 == y].index for y in x]
-                   for item in sublist], na_action='ignore')
+    neighbors_csv = pd.read_csv(csv_path("mledoze-countries.csv"), sep=';',
+                                usecols=[4, 17])
+    neighbors_csv.columns = ["Code", "neighbors"]
+    neighbors_csv["neighbors"] = neighbors_csv["neighbors"].str.split(',')
+    for row in neighbors_csv.loc[neighbors_csv.neighbors.isnull(), 'neighbors'].index:
+        neighbors_csv.at[row, 'neighbors'] = []
     # Island nations are a weird exception
-    neighbors_csv["neighbors"]["Madagascar"] = ["Mozambique", "South Africa", "Tanzania"]
-    neighbors_csv["neighbors"]["Taiwan"] = ["China", "Philippines"]
-    neighbors_csv["neighbors"]["New Zealand"] = ["Australia"]
-    neighbors_csv["neighbors"]["Australia"] = ["New Zealand"]
-    neighbors_csv["neighbors"]["Japan"] = ["Taiwan", "South Korea", "Philippines"]
-    neighbors_csv["neighbors"]["Philippines"] = ["Taiwan", "South Korea", "Japan"]
-    # TODO: Why isn't Norway getting any neighbors?
-    neighbors_csv["neighbors"]["Norway"] = ["Sweden"]
-    neighbors_csv["neighbors"]["Singapore"] = ["Malaysia", "Indonesia"]
-    neighbors_csv["neighbors"]["Puerto Rico"] = ["United States", "Dominican Republic"]
-    neighbors_csv["neighbors"]["Jamaica"] = ["Cuba", "Dominican Republic"]
-    neighbors_csv["neighbors"]["Cuba"] = ["Jamaica", "Dominican Republic"]
-    neighbors_csv["neighbors"]["Sri Lanka"] = ["India"]
-    neighbors_csv["neighbors"]["France"] = ["Germany", "Switzerland", "Italy", "Belgium",
-                                            "Luxembourg", "Spain", "Andorra"]
+    neighbors_csv.loc[neighbors_csv.Code == "MDG", "neighbors"] = [["MOZ", "ZAF", "TZA"]]
+    neighbors_csv.loc[neighbors_csv.Code == "TWN", "neighbors"] = [["CHN", "PHL"]]
+    neighbors_csv.loc[neighbors_csv.Code == "AUS", "neighbors"] = [["NZL"]]
+    neighbors_csv.loc[neighbors_csv.Code == "NZL", "neighbors"] = [["AUS"]]
+    neighbors_csv.loc[neighbors_csv.Code == "JPN", "neighbors"] = [["TWN", "KOR", "PHL"]]
+    neighbors_csv.loc[neighbors_csv.Code == "PHL", "neighbors"] = [["TWN", "KOR", "JPN"]]
+    neighbors_csv.loc[neighbors_csv.Code == "PRI", "neighbors"] = [["DOM"]]
+    neighbors_csv.loc[neighbors_csv.Code == "SGP", "neighbors"] = [["MYS", "IDN"]]
+    neighbors_csv.loc[neighbors_csv.Code == "JAM", "neighbors"] = [["CUB", "DOM"]]
     return neighbors_csv
 
 
@@ -150,13 +159,16 @@ def all(fill_nan=True):
     """
     Join all data into a single DataFrame.
     """
-    df = (population()
-          .join(gdp())
-          .join(employment())
-          .join(conflict())
-          .join(neighbors())
-          .join(fertility())
-          .join(net_migration()))
+    df = population().merge(codemap(), left_index=True, right_on='Name')
+    df = df[df.Population > MIN_POPULATION * POPULATION_SCALE]
+    df.columns = ["Population", "Code", "FullName"]
+    for g in map(lambda e: e().merge(codemap(), left_index=True, right_on='Name'),
+                 [employment, conflict, fertility, gdp]):
+        df = df.merge(g, on='Code', how='left')
+    df = df.merge(neighbors(), how='left', on='Code')
+    df = df.set_index(["Code"])
+    df = df[COUNTRY_COLS]
+    df = df.sort_values("FullName")
     if not fill_nan:
         return df
     # Some countries are missing data. We will guess this data using that of
@@ -167,3 +179,7 @@ def all(fill_nan=True):
             for item, frame in df[df[column].isnull()]["neighbors"].iteritems():
                 df.set_value(item, column, df[df.index.isin(frame)][column].mean())
     return df
+
+
+if __name__ == "__main__":
+    print(all())

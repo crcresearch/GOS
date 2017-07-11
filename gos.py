@@ -60,6 +60,7 @@ class Globe:
             self.pool.imap(self._gen_agents,
                            np.array_split(country_array, self.processes * self.splits))
         )
+        self.agents.index = range(len(self.agents))
 
     def run_par(self, function, **kwargs):
         """
