@@ -32,5 +32,7 @@ Migration Example
 GOS is designed to be run via commandline or more interactively Jupyter.
 
 Command Line example
+
 ::
+
 Jupyter Example with Data Visualization
