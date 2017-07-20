@@ -26,7 +26,11 @@ They can both be installed using pip:
 
     pip install numpy pandas
 
-.. Setup
-   -----
+Migration Example
+-----------------
 
-   GOS is specifically designed to be run in Jupyter.
+GOS is designed to be run via commandline or more interactively Jupyter.
+
+Command Line example
+::
+Jupyter Example with Data Visualization
