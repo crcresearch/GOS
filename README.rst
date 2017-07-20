@@ -2,17 +2,18 @@
 The Global Open Simulator
 =========================
 
-An agent-based modelling system designed for parallel computing.
+A parallel agent-based platform for global social modelling.
 
 Introduction
 ------------
 
-GOS is designed to enable high scale agent-based modeling in Python.
-By using the ``multiprocessing`` library, GOS is able to run in
-parallel.
+GOS is designed to enable high scale agent-based modeling in Python (and Jupyter).
+By using the ``multiprocessing`` library, GOS is able to run in parallel.
 
 Installation
 ------------
+
+GOS is designed to run on Python 3.
 
 The following are dependencies:
 
@@ -24,8 +25,6 @@ They can both be installed using pip:
 ::
 
     pip install numpy pandas
-
-GOS is designed to run on Python 3.
 
 .. Setup
    -----
