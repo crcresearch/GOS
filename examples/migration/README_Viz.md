@@ -32,5 +32,5 @@ Demo can be accessed by commond:
 Note:
 1. Basemap method is based on matplotlib library, and the output is a figure,
    while the Plotly is a commercial library and it will generate an interactive map within the html file.
-2. You can switch the visualizaton methods by editing iVizDemo.py import part.
+2. You can switch the visualizaton methods by editing VizDemo.py import part.
 3. VizDemo.py should be in the same dictionary as migration.py.
