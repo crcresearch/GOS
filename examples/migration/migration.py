@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
 import data as data
-from constants import POPULATION_SCALE, MIGRATION_THRESHOLD, PROCESSES, SPLITS
+from constants import POPULATION_SCALE, MIGRATION_THRESHOLD, PROCESSES, SPLITS, BRAIN_DRAIN_THRESHOLD
 from gos import Globe
 
 # The attributes for each agent.
-world_columns = ["Country", "Income", "Employed", "Attachment", "Location", "Migration"]
+world_columns = ["Country", "Income", "High Income", "Employed", "Attachment",
+                 "Location", "Neighborhood", "Migration"]
 
 
 def generate_agents(df, country, population):
@@ -30,9 +31,11 @@ def generate_agents(df, country, population):
     frame = pd.DataFrame({
         "Country": pd.Categorical([country] * population, list(df.index)),
         "Income": income_array,
+        "High Income": income_array > gdp * BRAIN_DRAIN_THRESHOLD,
         "Employed": employment_array.astype('bool'),
         "Attachment": attachment_array,
         "Location": pd.Categorical([country] * population, list(df.index)),
+        "Neighborhood": np.random.randint(10, size=population).astype('uint8'),
         "Migration": 0,
     }, columns=world_columns)
     return frame
@@ -62,6 +65,9 @@ def migrate_score(a, **kwargs):
     max_conflict = kwargs["max_conflict"]
     conflict = conflict_scores.merge(a, left_index=True,
                                      right_on='Location')["Conflict"] / max_conflict
+    gdp = kwargs["gdp"]
+    # Brain drain
+    a.loc[a["High Income"] == True, "Income"] = 0
     return ((10 * (1 + a.Income / -max_income) +
              10 * a.Attachment +
              (5 * conflict) +
@@ -76,8 +82,9 @@ def main():
 
     globe.agents.Migration = globe.run_par(migrate_score, max_income=globe.agents.Income.max(),
                                            conflict=globe.df[["Conflict"]].sort_index(),
+                                           gdp=globe.df[["GDP"]].sort_index(),
                                            max_conflict=globe.df.Conflict.max(),
-                                           columns=["Income", "Employed", "Attachment", "Location"])
+                                           columns=["Income", "High Income", "Employed", "Attachment", "Location"])
 
     attractiveness = ((1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
                       (globe.df["GDP"] / globe.max_value("GDP")) +
