@@ -1,4 +1,3 @@
-
 Visualization for GOS
 =========================
 
