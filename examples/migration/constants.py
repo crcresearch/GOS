@@ -13,7 +13,7 @@ MIGRATION_THRESHOLD = 0.7825
 
 # Any income above this level multiplied by the country's GDP is brought
 # down to this level.
-BRAIN_DRAIN_THRESHOLD = 1.5
+BRAIN_DRAIN_THRESHOLD = 2.0
 
 # The number of processes to spawn of in multiprocessing.
 PROCESSES = cpu_count() - 1
