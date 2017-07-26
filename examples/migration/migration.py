@@ -3,6 +3,7 @@ import pandas as pd
 import data as data
 from constants import POPULATION_SCALE, MIGRATION_THRESHOLD, PROCESSES, SPLITS, BRAIN_DRAIN_THRESHOLD
 from gos import Globe
+import sys
 
 # The attributes for each agent.
 world_columns = ["Country", "Income", "High Income", "Employed", "Attachment",
@@ -74,9 +75,9 @@ def migrate_score(a, **kwargs):
              3 + a.Employed * 4) / 32).astype('float32')
 
 
-def main():
+def main(proc=PROCESSES):
     np.random.seed(1000)
-    globe = Globe(data.all(), processes=PROCESSES, splits=SPLITS)
+    globe = Globe(data.all(), processes=proc, splits=SPLITS)
 
     globe.create_agents(generate_agents)
 
@@ -119,4 +120,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        main(int(sys.argv[1]))
+    else:
+        main()
