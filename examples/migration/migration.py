@@ -106,6 +106,7 @@ def main(proc=PROCESSES):
                                              columns=["Country", "Location", "Migration"])
 
     print("Migration model completed at a scale of {}:1.".format(int(1 / POPULATION_SCALE)))
+    print("The model used {} child processes".format(globe.processes))
     migrants = globe.agents[globe.agents.Country != globe.agents.Location]
     print("There were a total of {} migrants.".format(len(migrants)))
     print("There were a total of {} agents.".format(len(globe.agents)))
