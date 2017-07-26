@@ -84,8 +84,6 @@ def main():
                       (1 - globe.df["Unemployment"] / globe.max_value("Unemployment")) +
                       (1 - globe.df["Fertility"] / globe.max_value("Fertility")))
 
-    attractiveness.to_csv('attractiveness.csv')
-
     def neighbors(country):
         return globe.df[globe.df.index == country].iloc[0].neighbors
 
@@ -105,15 +103,10 @@ def main():
     print("There were a total of {} agents.".format(len(globe.agents)))
     changes = (globe.agents.Location.value_counts() -
                globe.agents.Country.value_counts()).sort_values()
-    changes.to_csv('changes.csv')
     print(changes.head())
     print(changes.tail())
     print("The potential migrants came from")
     migrants = globe.agents[globe.agents.Migration > MIGRATION_THRESHOLD]
-    ms = migrants.Country.value_counts()
-    ms2 = migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)]
-    ms.to_csv('ms.csv')
-    ms2.to_csv('ms2.csv')
     print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])
     return globe
 

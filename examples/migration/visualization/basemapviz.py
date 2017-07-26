@@ -7,11 +7,11 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import Normalize
 
-def map(dataframe, title = "Map", r = 'c'):
+def map(dataframe, title = "Map", colorbarName = None):
 
-	fig, ax = plt.subplots(figsize=(40,80))
+	fig, ax = plt.subplots(figsize=(80,40))
 
-	m = Basemap(resolution=r, # c, l, i, h, f or None
+	m = Basemap(resolution='l', # c, l, i, h, f or None
 		    projection='robin',
 		    lon_0=0)
 
@@ -19,7 +19,7 @@ def map(dataframe, title = "Map", r = 'c'):
 	m.fillcontinents(color='#f2f2f2',lake_color='#46bcec')
 	# m.drawcoastlines()
 
-	plt.title(title, fontsize=50, y=1.05)
+	plt.title(title, fontsize=50, y=1.08)
 
 	m.readshapefile('visualization/World/World', 'world',drawbounds=False)
 
@@ -28,25 +28,9 @@ def map(dataframe, title = "Map", r = 'c'):
 		'country': [country['ISO3'] for country in m.world_info]
 	    })
 
-	# print (df_plot)
-
-        df_plot.to_csv("1.csv")
-
-	# result = pd.read_csv('output.csv')
-
-	# print (result)
-
 	df_plot = df_plot.merge(dataframe, on='country', how='left')
 
-	# df_plot = df_plot.fillna(0)
-
-        df_plot.to_csv("1-2.csv")
-
 	df_plot = df_plot.dropna()
-
-	# print (df_plot)
-
-        df_plot.to_csv("2.csv")
 
 	cmap = plt.get_cmap('RdYlGn')   
 	pc = PatchCollection(df_plot.shapes, zorder=2)
@@ -58,7 +42,7 @@ def map(dataframe, title = "Map", r = 'c'):
 	mapper = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
 
 	mapper.set_array(df_plot['value'])
-	plt.colorbar(mapper, shrink=0.2)
+	cbar = plt.colorbar(mapper, shrink=0.7, label = colorbarName)
 	
 
 	fig = plt.gcf()
