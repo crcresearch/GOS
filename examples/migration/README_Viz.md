@@ -19,8 +19,6 @@ The following are dependencies:
 
 They can be installed using conda and pip:
 
-::
-
     conda(or conda3) install basemap
     sudo pip(or pip3) install plotly
 
@@ -28,8 +26,6 @@ Visualization Demo
 ------------------
 
 Demo can be accessed by commond:
-
-::
 
     cd GOS/examples/migration/
     python VizDemo.py
