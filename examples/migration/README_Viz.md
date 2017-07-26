@@ -1,6 +1,4 @@
-=====================
 Visualization for GOS
-=====================
 
 Introduction
 ------------
