@@ -35,4 +35,19 @@ Command Line example
 
 ::
 
+    1. Clone into the git repository (https://github.com/paulrbrenner/GOS.git) using:
+	
+	    git clone https://github.com/crcresearch/GOS
+	
+    2. Install required packages. Navigate to gosdemo/GOS. Then use:
+	
+	    pip3 install -r requirements.txt
+
+    3. Navigate to GOS/examples/migration
+
+    4. Execute migration.py with:
+
+	    python3 migration.py
+    
+
 Jupyter Example with Data Visualization
