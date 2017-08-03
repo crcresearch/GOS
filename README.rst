@@ -49,7 +49,7 @@ Command Line example
 
 	    python3 migration.py
 	    
-    For interactive Plotly Data Visualization:
+For interactive Plotly Data Visualization in the command line:
     
     1. Install plotly with:
     	
