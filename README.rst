@@ -48,6 +48,19 @@ Command Line example
     4. Execute migration.py with:
 
 	    python3 migration.py
+	    
+    For interactive Plotly Data Visualization:
+    
+    1. Install plotly with:
+    	
+	pip3 install plotly
+	
+    2. In VizDemo.py, comment out the basemap import. The imports should read:
+    
+    	#import basemapviz as viz
+	import plotlyviz as viz
+	
+    3. Run VizDemo.py
     
 
 Jupyter Example with Data Visualization
