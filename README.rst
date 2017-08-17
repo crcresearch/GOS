@@ -24,7 +24,7 @@ They can both be installed using pip:
 
 ::
 
-    pip install numpy pandas
+    pip3 install numpy pandas
 
 Migration Example
 -----------------
