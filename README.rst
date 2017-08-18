@@ -39,7 +39,7 @@ Command Line example
 	
 	    git clone https://github.com/crcresearch/GOS
 	
-    2. Install required packages. Navigate to gosdemo/GOS. Then use:
+    2. Install required packages (if you have not already done so). From within the GOS directory, use:
 	
 	    pip3 install -r requirements.txt
 
