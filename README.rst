@@ -45,7 +45,7 @@ Command Line example
 
     3. Navigate to GOS/examples/migration
 
-    4. Execute migration.py with:
+    4. Execute migration.py with :
 
 	    python3 migration.py
 	    
