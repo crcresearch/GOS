@@ -25,6 +25,8 @@ They can both be installed using pip:
 ::
 
     pip3 install numpy pandas
+    Note: If you are running the code on a shared space, use the following:
+    	pip3 install --user numpy pandas
 
 Migration Example
 -----------------
@@ -56,6 +58,8 @@ For interactive Plotly Data Visualization in the command line
     1. Install plotly with:
     	
 	pip3 install plotly
+	If using a shared space use:
+		pip3 install --user plotly 
 	
     2. In VizDemo.py, comment out the basemap import. The imports should read:
     
