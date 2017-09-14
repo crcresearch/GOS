@@ -2,8 +2,8 @@ import sys
 sys.path.append("visualization/")
 
 #---Switch between two visualization methods by making one of the following lines as a comment---
-#import basemapviz as viz
-import plotlyviz as viz
+import basemapviz as viz
+#import plotlyviz as viz
 
 import pandas as pd
 
