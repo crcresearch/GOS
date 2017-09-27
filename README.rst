@@ -33,6 +33,7 @@ They can both be installed using pip:
 Migration Example
 -----------------
 Migration is the primary and most robust example of using the global open simulator (GOS). 
+
 GOS is designed to be run via commandline or more interactively Jupyter.
 
 Command Line example
