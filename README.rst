@@ -27,7 +27,7 @@ They can both be installed using pip:
     pip3 install numpy pandas
     
     Note: If you are running the code on a shared space, use the following:
-	module load python/3.6.0 #enables usage of pip3 
+	module load python/3.6.0       #enables usage of pip3 
 	pip3 install --user numpy pandas
 
 Migration Example
