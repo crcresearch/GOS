@@ -22,7 +22,8 @@ The following are dependencies:
 
 They can both be installed using pip:
 If you are using a shared space, you may need to load Python3 before using pip3:
-	module load python/3.6.0
+module load python/3.6.0
+
 
 ::
 
