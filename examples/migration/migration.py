@@ -9,6 +9,14 @@ import sys
 world_columns = ["Country", "Income", "High Income", "Employed", "Attachment",
                  "Location", "Neighborhood", "Migration"]
 
+agentdt = np.dtype([('country', np.object),
+                    ('income', np.float32),
+                    ('high income', np.bool),
+                    ('employed', np.bool),
+                    ('attachment', np.float32),
+                    ('location', np.object),
+                    ('neighborhood', np.uint8),
+                    ('migration', np.float32)])
 
 def generate_agents(df, country, population):
     """
@@ -22,13 +30,22 @@ def generate_agents(df, country, population):
     rand = np.random.mtrand.RandomState(0)
     country_data = df[df.index == country].to_dict("records")[0]
     gdp = country_data["GDP"]
-    income_array = gdp / 10 * rand.chisquare(10, population).astype('float32')
+    income_array = gdp / 10 * rand.chisquare(10, (population,1)).astype('float32')
     unemployment_rate = float(country_data["Unemployment"] / 100.0)
-    employment_array = rand.choice([True, False], population,
+    employment_array = rand.choice([True, False], (population,1),
                                    p=[1 - unemployment_rate, unemployment_rate])
     attachment_array = (country_data["Fertility"] *
-                        rand.triangular(0.0, 0.5, 1.0, population) /
+                        rand.triangular(0.0, 0.5, 1.0, (population,1)) /
                         max_value("Fertility")).astype('float32')
+    frame = np.empty([population,1], dtype=agentdt, order='F')
+    frame["country"] = country
+    frame["income"] = income_array
+    frame["high income"] = income_array > gdp * BRAIN_DRAIN_THRESHOLD
+    frame["employed" ] = employment_array.astype('bool')
+    frame["attachment"] = attachment_array
+    frame["location"] = frame["country"]
+    frame["neighborhood"] = np.random.randint(10, size=(population,1)).astype('uint8')
+    """
     frame = pd.DataFrame({
         "Country": pd.Categorical([country] * population, list(df.index)),
         "Income": income_array,
@@ -39,6 +56,7 @@ def generate_agents(df, country, population):
         "Neighborhood": np.random.randint(10, size=population).astype('uint8'),
         "Migration": 0,
     }, columns=world_columns)
+    """
     return frame
 
 
@@ -80,13 +98,16 @@ def main(proc=PROCESSES):
     globe = Globe(data.all(), processes=proc, splits=SPLITS)
 
     globe.create_agents(generate_agents)
-
+    print(globe.agents)
+    """
     globe.agents.Migration = globe.run_par(migrate_score, max_income=globe.agents.Income.max(),
                                            conflict=globe.df[["Conflict"]].sort_index(),
                                            gdp=globe.df[["GDP"]].sort_index(),
                                            max_conflict=globe.df.Conflict.max(),
                                            columns=["Income", "High Income", "Employed", "Attachment", "Location"])
-
+    print("The potential migrants came from")
+    migrants = globe.agents[globe.agents.Migration > MIGRATION_THRESHOLD]
+    print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])
     attractiveness = ((1 - globe.df["Conflict"] / globe.max_value("Conflict")) +
                       (globe.df["GDP"] / globe.max_value("GDP")) +
                       (1 - globe.df["Unemployment"] / globe.max_value("Unemployment")) +
@@ -118,6 +139,7 @@ def main(proc=PROCESSES):
     migrants = globe.agents[globe.agents.Migration > MIGRATION_THRESHOLD]
     print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])
     return globe
+    """
 
 
 if __name__ == "__main__":
