@@ -56,11 +56,17 @@ class Globe:
         country_array.index = range(len(country_array))
         # Garbage collect before creating new processes.
         gc.collect()
+        """
         self.agents = pd.concat(
             self.pool.imap(self._gen_agents,
                            np.array_split(country_array, self.processes * self.splits))
         )
         self.agents.index = range(len(self.agents))
+        """
+        self.agents = np.concatenate(
+            self.pool.imap(self._gen_agents,
+                           np.array_split(country_array, self.processes * self.splits))
+        )
 
     def run_par(self, function, **kwargs):
         """

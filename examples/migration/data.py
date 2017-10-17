@@ -31,7 +31,8 @@ def population():
     """
     Read the population for each country.
     """
-    pop_csv = pd.read_csv(csv_path("Population.csv"), thousands=',', index_col=0,
+    pop_csv = pd.read_csv(csv_path("Population.csv"),
+                          index_col=0,
                           dtype={"Population": np.uint32})
     pop_csv["Population"] = (pop_csv["Population"] * POPULATION_SCALE).astype("uint32")
     return pop_csv
