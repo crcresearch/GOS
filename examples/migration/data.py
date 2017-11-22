@@ -55,7 +55,7 @@ def employment():
     return pd.read_csv(csv_path("CIA_Unemployment.csv"), index_col=0, usecols=[1, 2])
 
 
-# This is a dictionary used to translate names that do not the ones used elsewhere.
+# This is a dictionary used to translate names that do not math the ones used elsewhere.
 # TODO: Use ISO3 codes for each country and map their names to their codes using a CSV.
 alt_names = {
     "Russia (Soviet Union)": "Russia",
