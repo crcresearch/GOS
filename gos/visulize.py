@@ -7,9 +7,16 @@ import matplotlib.pyplot as plt
 from matplotlib import cbook
 from matplotlib.colors import Normalize
 from matplotlib.patches import Polygon
-from mpl_toolkits.basemap import Basemap
+#from mpl_toolkits.basemap import Basemap
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import Normalize, LogNorm, BoundaryNorm
+
+# This is a rewrite of the map_plot function using Cartopy
+import cartopy.crs as ccrs
+from cartopy.io.shapereader import Reader
+from cartopy.feature import ShapelyFeature, OCEAN, LAND
+from matplotlib.colors import Normalize
+from matplotlib.collections import PatchCollection
 
 COLOR1 = '#46bcec'
 COLOR2 = '#eeeeee'
@@ -77,66 +84,67 @@ class MidPointNorm(Normalize):
             else:
                 return  val*abs(vmax-midpoint) + midpoint
 
+countries = Reader("./gos/World/World")
+isos = [x.attributes['ISO3'] for x in countries.records()]
+df_plot = pd.DataFrame({
+    'shapes': [ShapelyFeature(x, ccrs.PlateCarree()) for x in countries.geometries()],
+    'country': isos,
+    'values': 0,
+})
+
 def map_plot(title, color, data, normc, sides=1):
-    fix, ax = plt.subplots(figsize=(20, 10))
-    m = Basemap(resolution='l',
-               projection='robin',
-               lon_0=0)
-
-    m.drawmapboundary(fill_color=COLOR1)
-    m.fillcontinents(color='#FFFFFF', lake_color=COLOR1)
-    plt.title(title, fontsize=50, y=1.08)
-    m.readshapefile('./gos/World/World', 'world',drawbounds=False)
-    l = [country['ISO3'] for country in m.world_info]
-    df_plot = pd.DataFrame({
-        'shapes': [Polygon(np.array(shape), True) for shape in m.world],
-        'country': l,
-        'values': [data[x] if x in data else None for x in l]
-    })
-    df_plot = df_plot.dropna()
-
-    cmap = plt.get_cmap(color, 7)
-    pc = PatchCollection(df_plot.shapes, zorder=2)
+    fig, _ = plt.subplots(figsize=(20, 10))
+    ax = plt.axes(projection=ccrs.Robinson())
+    ax.add_feature(OCEAN)
+    ax.add_feature(LAND, facecolor='none', hatch='////', edgecolor='#CCCCCC',linewidth=0.0)
+    values = [data[x] if x in data else None for x in isos]
+    df = df_plot
+    df["values"] = values
+    values = data.values
+    # TODO: This needs to be adjusted based on sides
+    #norm = normc(vmin=min(values), vmax=max(values))
     if sides == 1:
         norm = normc(
-            vmin=df_plot['values'].min(),
-            vmax=df_plot['values'].max())
+            vmin=min(values),
+            vmax=max(values))
     else:
         norm = normc(
-            vmin=-df_plot['values'].abs().max(),
-            vmax=df_plot['values'].abs().max())
-    pc.set_facecolor(cmap(norm(df_plot['values'].values)))
-    ax.add_collection(pc)
-
+            vmin=-np.max(np.abs(values)),
+            vmax=np.max(np.abs(values)))
+    cmap = plt.get_cmap(color, 7)
+    for _, country in df.dropna().iterrows():
+        ax.add_feature(country["shapes"], color=cmap(norm(country["values"])))
     mapper = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
-    mapper.set_array(df_plot['values'])
+    mapper.set_array(df['values'])
     cbar = plt.colorbar(mapper, shrink=0.7,
-                       orientation='horizontal')
-
+                        orientation='horizontal')
+    plt.title(title, fontsize=50, y=1.08)
     fig = plt.gcf()
-
     return plt
 
-"""
-def plot_lines(matrix):
-    fix, ax = plt.subplots(figsize=(24, 12))
-    m = Basemap(resolution='l',
-               projection='robin',
-               lon_0=0)
+COLOR1 = '#333333'
+COLOR2 = '#000000'
 
-    m.drawmapboundary(fill_color=COLOR1)
-    m.fillcontinents(color=COLOR2, lake_color=COLOR1)
+# TODO: This doesn't work quite yet.
+def plot_lines(matrix, distance_frame):
+    fix, ax = plt.subplots(figsize=(24, 12))
+    
+    ax = plt.axes(projection=ccrs.Robinson())
+    ax.set_global()
+    ax.add_feature(OCEAN, color=COLOR2)
+    ax.add_feature(LAND, color=COLOR1)
     d = distance_frame[distance_frame.index.isin(world.data.index)]
     for _, x in d.iterrows():
         for _, y in d.iterrows():
             if matrix[x.name][y.name] > 0.1:
-                m.drawgreatcircle(
-                    x["Longitude (average)"],
-                    x["Latitude (average)"],
-                    y["Longitude (average)"],
-                    y["Latitude (average)"],
-                    linewidth=2, #5 * (matrix[x.name][y.name] / matrix.max().max()) + 2,
-                    color='#00FF00{:02X}'.format((int(25 + 100 * matrix[x.name][y.name] / matrix.max().max())))
-                )
-    return plt
-"""
+                 plt.plot(
+                        [x["Longitude (average)"],
+                        x["Latitude (average)"]],
+                        [y["Longitude (average)"],
+                        y["Latitude (average)"]],
+                        linewidth=2,
+                        color='#00FF00{:02X}'.format((int(25 + 100 * matrix[x.name][y.name] / matrix.max().max()))),
+                        transform=ccrs.PlateCarree()
+                    )
+    fig = plt.gcf()
+    return fig
