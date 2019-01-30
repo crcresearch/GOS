@@ -1,0 +1,299 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Migration Model Example &#8212; GOS 0.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Multiscale Migration Model Example" href="multiscale-migration.html" />
+    <link rel="prev" title="The Global Open Simulator" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="migration-model-example">
+<h1>Migration Model Example<a class="headerlink" href="#migration-model-example" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">country-codes.csv</span></code> contains country codes and miscellaneous metadata on
+countries. It is sourced from a <a class="reference external" href="https://github.com/datasets/country-codes">dataset</a>
+released by <a class="reference external" href="http://data.okfn.org/roadmap/core-datasets">Open Knowledge International</a>
+under a “Public Domain Dedication and License”. Data from this data set (namely
+the official English names of countries) is also used in <code class="docutils literal notranslate"><span class="pre">names_to_codes.csv</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Population.csv</span></code> appears to come from the CIA World Factbook (?).</p>
+<p><code class="docutils literal notranslate"><span class="pre">UN_GDP.csv</span></code> is GDP data from the UN.</p>
+<p><code class="docutils literal notranslate"><span class="pre">CIA_Unemployment</span></code> is unemployment data from the CIA World Factbook.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ucdp-prio-acd-4-2016.csv</span></code> is data on major conflicts. The data comes
+from the <a class="reference external" href="https://www.prio.org/Data/Armed-Conflict/UCDP-PRIO">UCDP/PRIO Armed Conflict Dataset</a> which can be
+downloaded form <a class="reference external" href="http://ucdp.uu.se/downloads/">Uppsala University</a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mledoze-countries.csv</span></code> contains information standardized information about
+each country and is also used to determine which countries border each other.
+The original data is hosted by Mohammed Le Doze on <a class="reference external" href="https://github.com/mledoze/countries">GitHub</a>. It is used under the
+Open Database License.</p>
+<p><code class="docutils literal notranslate"><span class="pre">attachment.csv</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">API_SM.POP.NETM_DS2_en_csv_v2.csv</span></code> contains net migration data on each
+country collected every five years. The data comes from the <a class="reference external" href="http://data.worldbank.org/indicator/SM.POP.NETM">World Bank</a> under their <a class="reference external" href="http://data.worldbank.org/summary-terms-of-use">Terms of Use</a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">API_SL.UEM.TOTL.ZS_DS2_en_csv_v2.csv</span></code> (currently unused) comes from the
+World Bank.</p>
+<p><code class="docutils literal notranslate"><span class="pre">FertilityRate.csv</span></code> (unused)</p>
+<p><code class="docutils literal notranslate"><span class="pre">Mainconflicttable.csv</span></code> (unused)</p>
+<p><code class="docutils literal notranslate"><span class="pre">MarriageAge.csv</span></code> (unused)</p>
+<p><code class="docutils literal notranslate"><span class="pre">Neighbors.csv</span></code> (unused)</p>
+<p><code class="docutils literal notranslate"><span class="pre">Pop_Women_vs_Men.csv</span></code> (unused)</p>
+</div>
+<div class="section" id="code">
+<h2>Code<a class="headerlink" href="#code" title="Permalink to this headline">¶</a></h2>
+<p>This documents and explains the migration model.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">data</span> <span class="k">as</span> <span class="nn">data</span>
+<span class="kn">from</span> <span class="nn">constants</span> <span class="k">import</span> <span class="n">POPULATION_SCALE</span><span class="p">,</span> <span class="n">MIGRATION_THRESHOLD</span><span class="p">,</span> <span class="n">PROCESSES</span><span class="p">,</span> <span class="n">SPLITS</span><span class="p">,</span> <span class="n">BRAIN_DRAIN_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">gos</span> <span class="k">import</span> <span class="n">Globe</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="c1"># The attributes for each agent.</span>
+<span class="n">world_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Country&quot;</span><span class="p">,</span> <span class="s2">&quot;Income&quot;</span><span class="p">,</span> <span class="s2">&quot;High Income&quot;</span><span class="p">,</span> <span class="s2">&quot;Employed&quot;</span><span class="p">,</span> <span class="s2">&quot;Attachment&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;Location&quot;</span><span class="p">,</span> <span class="s2">&quot;Neighborhood&quot;</span><span class="p">,</span> <span class="s2">&quot;Migration&quot;</span><span class="p">]</span>
+
+<span class="n">agentdt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s1">&#39;country&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;income&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;high income&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;employed&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;attachment&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;neighborhood&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;migration&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)])</span>
+
+<span class="k">def</span> <span class="nf">generate_agents</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">country</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a dataframe of agents for a country where population</span>
+<span class="sd">    is the number of agents to be created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">max_value</span><span class="p">(</span><span class="n">attribute</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="c1"># Turn this on for truly random output from each process.</span>
+    <span class="c1"># pid = mp.current_process()._identity[0]</span>
+    <span class="n">rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">mtrand</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">country_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">country</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s2">&quot;records&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">gdp</span> <span class="o">=</span> <span class="n">country_data</span><span class="p">[</span><span class="s2">&quot;GDP&quot;</span><span class="p">]</span>
+    <span class="n">income_array</span> <span class="o">=</span> <span class="n">gdp</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">rand</span><span class="o">.</span><span class="n">chisquare</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">unemployment_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">country_data</span><span class="p">[</span><span class="s2">&quot;Unemployment&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span>
+    <span class="n">employment_array</span> <span class="o">=</span> <span class="n">rand</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                                   <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">unemployment_rate</span><span class="p">,</span> <span class="n">unemployment_rate</span><span class="p">])</span>
+    <span class="n">attachment_array</span> <span class="o">=</span> <span class="p">(</span><span class="n">country_data</span><span class="p">[</span><span class="s2">&quot;Fertility&quot;</span><span class="p">]</span> <span class="o">*</span>
+                        <span class="n">rand</span><span class="o">.</span><span class="n">triangular</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span>
+                        <span class="n">max_value</span><span class="p">(</span><span class="s2">&quot;Fertility&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">population</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">agentdt</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">country</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;income&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">income_array</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;high income&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">income_array</span> <span class="o">&gt;</span> <span class="n">gdp</span> <span class="o">*</span> <span class="n">BRAIN_DRAIN_THRESHOLD</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;employed&quot;</span> <span class="p">]</span> <span class="o">=</span> <span class="n">employment_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;attachment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attachment_array</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">]</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;neighborhood&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    frame = pd.DataFrame({</span>
+<span class="sd">        &quot;Country&quot;: pd.Categorical([country] * population, list(df.index)),</span>
+<span class="sd">        &quot;Income&quot;: income_array,</span>
+<span class="sd">        &quot;High Income&quot;: income_array &gt; gdp * BRAIN_DRAIN_THRESHOLD,</span>
+<span class="sd">        &quot;Employed&quot;: employment_array.astype(&#39;bool&#39;),</span>
+<span class="sd">        &quot;Attachment&quot;: attachment_array,</span>
+<span class="sd">        &quot;Location&quot;: pd.Categorical([country] * population, list(df.index)),</span>
+<span class="sd">        &quot;Neighborhood&quot;: np.random.randint(10, size=population).astype(&#39;uint8&#39;),</span>
+<span class="sd">        &quot;Migration&quot;: 0,</span>
+<span class="sd">    }, columns=world_columns)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">frame</span>
+
+
+<span class="k">def</span> <span class="nf">migrate_array</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">Migration</span> <span class="o">&gt;</span> <span class="n">MIGRATION_THRESHOLD</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">Location</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="n">migration_map</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;migration_map&quot;</span><span class="p">]</span>
+    <span class="n">countries</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;countries&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">country</span><span class="p">,</span> <span class="n">population</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;Location&quot;</span><span class="p">):</span>
+        <span class="n">local_attraction</span> <span class="o">=</span> <span class="n">migration_map</span><span class="p">[</span><span class="n">country</span><span class="p">]</span>
+        <span class="n">local_attraction</span> <span class="o">/=</span> <span class="n">local_attraction</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">migrants_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">[</span><span class="n">population</span><span class="o">.</span><span class="n">Migration</span> <span class="o">&gt;</span> <span class="n">MIGRATION_THRESHOLD</span><span class="p">])</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">a</span><span class="o">.</span><span class="n">Country</span> <span class="o">==</span> <span class="n">country</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">Migration</span> <span class="o">&gt;</span> <span class="n">MIGRATION_THRESHOLD</span><span class="p">),</span>
+              <span class="s2">&quot;Location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">countries</span><span class="p">,</span>
+                                             <span class="n">p</span><span class="o">=</span><span class="n">local_attraction</span><span class="p">,</span>
+                                             <span class="n">size</span><span class="o">=</span><span class="n">migrants_num</span><span class="p">,</span>
+                                             <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">Location</span>
+
+
+<span class="k">def</span> <span class="nf">migrate_score</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">max_income</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;max_income&quot;</span><span class="p">]</span>
+    <span class="n">conflict_scores</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;conflict&quot;</span><span class="p">]</span>
+    <span class="n">max_conflict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;max_conflict&quot;</span><span class="p">]</span>
+    <span class="n">conflict</span> <span class="o">=</span> <span class="n">conflict_scores</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                     <span class="n">right_on</span><span class="o">=</span><span class="s1">&#39;Location&#39;</span><span class="p">)[</span><span class="s2">&quot;Conflict&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">max_conflict</span>
+    <span class="n">gdp</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;gdp&quot;</span><span class="p">]</span>
+    <span class="c1"># Brain drain</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s2">&quot;High Income&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Income&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="p">((</span><span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">Income</span> <span class="o">/</span> <span class="o">-</span><span class="n">max_income</span><span class="p">)</span> <span class="o">+</span>
+             <span class="mi">10</span> <span class="o">*</span> <span class="n">a</span><span class="o">.</span><span class="n">Attachment</span> <span class="o">+</span>
+             <span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">conflict</span><span class="p">)</span> <span class="o">+</span>
+             <span class="mi">3</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">Employed</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">32</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">proc</span><span class="o">=</span><span class="n">PROCESSES</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="n">globe</span> <span class="o">=</span> <span class="n">Globe</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">splits</span><span class="o">=</span><span class="n">SPLITS</span><span class="p">)</span>
+
+    <span class="n">globe</span><span class="o">.</span><span class="n">create_agents</span><span class="p">(</span><span class="n">generate_agents</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">globe</span><span class="o">.</span><span class="n">agents</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    globe.agents.Migration = globe.run_par(migrate_score, max_income=globe.agents.Income.max(),</span>
+<span class="sd">                                           conflict=globe.df[[&quot;Conflict&quot;]].sort_index(),</span>
+<span class="sd">                                           gdp=globe.df[[&quot;GDP&quot;]].sort_index(),</span>
+<span class="sd">                                           max_conflict=globe.df.Conflict.max(),</span>
+<span class="sd">                                           columns=[&quot;Income&quot;, &quot;High Income&quot;, &quot;Employed&quot;, &quot;Attachment&quot;, &quot;Location&quot;])</span>
+<span class="sd">    print(&quot;The potential migrants came from&quot;)</span>
+<span class="sd">    migrants = globe.agents[globe.agents.Migration &gt; MIGRATION_THRESHOLD]</span>
+<span class="sd">    print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])</span>
+<span class="sd">    attractiveness = ((1 - globe.df[&quot;Conflict&quot;] / globe.max_value(&quot;Conflict&quot;)) +</span>
+<span class="sd">                      (globe.df[&quot;GDP&quot;] / globe.max_value(&quot;GDP&quot;)) +</span>
+<span class="sd">                      (1 - globe.df[&quot;Unemployment&quot;] / globe.max_value(&quot;Unemployment&quot;)) +</span>
+<span class="sd">                      (1 - globe.df[&quot;Fertility&quot;] / globe.max_value(&quot;Fertility&quot;)))</span>
+
+<span class="sd">    def neighbors(country):</span>
+<span class="sd">        return globe.df[globe.df.index == country].iloc[0].neighbors</span>
+
+<span class="sd">    migration_map = {}</span>
+<span class="sd">    for country in globe.df.index:</span>
+<span class="sd">        local_attraction = attractiveness.copy()</span>
+<span class="sd">        local_attraction[local_attraction.index.isin(neighbors(country))] += 1</span>
+<span class="sd">        migration_map[country] = local_attraction</span>
+
+<span class="sd">    globe.agents[&quot;Location&quot;] = globe.run_par(migrate_array, migration_map=migration_map,</span>
+<span class="sd">                                             countries=globe.df.index,</span>
+<span class="sd">                                             columns=[&quot;Country&quot;, &quot;Location&quot;, &quot;Migration&quot;])</span>
+
+<span class="sd">    print(&quot;Migration model completed at a scale of {}:1.&quot;.format(int(1 / POPULATION_SCALE)))</span>
+<span class="sd">    print(&quot;The model used {} child processes&quot;.format(globe.processes))</span>
+<span class="sd">    migrants = globe.agents[globe.agents.Country != globe.agents.Location]</span>
+<span class="sd">    print(&quot;There were a total of {} migrants.&quot;.format(len(migrants)))</span>
+<span class="sd">    print(&quot;There were a total of {} agents.&quot;.format(len(globe.agents)))</span>
+<span class="sd">    changes = (globe.agents.Location.value_counts() -</span>
+<span class="sd">               globe.agents.Country.value_counts()).sort_values()</span>
+<span class="sd">    print(changes.head())</span>
+<span class="sd">    print(changes.tail())</span>
+<span class="sd">    print(&quot;The potential migrants came from&quot;)</span>
+<span class="sd">    migrants = globe.agents[globe.agents.Migration &gt; MIGRATION_THRESHOLD]</span>
+<span class="sd">    print(migrants.Country.value_counts()[migrants.Country.value_counts().gt(0)])</span>
+<span class="sd">    return globe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">main</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GOS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Migration Model Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code">Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multiscale-migration.html">Multiscale Migration Model Example</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">The Global Open Simulator</a></li>
+      <li>Next: <a href="multiscale-migration.html" title="next chapter">Multiscale Migration Model Example</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Carl Colglazier.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/source/migration.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
