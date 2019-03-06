@@ -1,13 +1,13 @@
 # https://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib
 import numpy as np
 from numpy import ma
+import os
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cbook
 from matplotlib.colors import Normalize
 from matplotlib.patches import Polygon
-#from mpl_toolkits.basemap import Basemap
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import Normalize, LogNorm, BoundaryNorm
 
@@ -21,7 +21,10 @@ from matplotlib.collections import PatchCollection
 COLOR1 = '#46bcec'
 COLOR2 = '#eeeeee'
 
-class MidPointNorm(Normalize):    
+class MidPointNorm(Normalize):
+    """
+    Helper normalization class.
+    """
     def __init__(self, midpoint=0, vmin=None, vmax=None, clip=False):
         Normalize.__init__(self,vmin, vmax, clip)
         self.midpoint = midpoint
@@ -84,10 +87,12 @@ class MidPointNorm(Normalize):
             else:
                 return  val*abs(vmax-midpoint) + midpoint
 
-countries = Reader("./gos/World/World")
+mod_dir, filename = os.path.split(__file__)
+shape_path = os.path.join(mod_dir, "World")
+countries = Reader(shape_path)
 isos = [x.attributes['ISO3'] for x in countries.records()]
 df_plot = pd.DataFrame({
-    'shapes': [ShapelyFeature(x, ccrs.PlateCarree()) for x in countries.geometries()],
+    #'shapes': [ShapelyFeature(x, ccrs.PlateCarree()) for x in countries.geometries()],
     'country': isos,
     'values': 0,
 })

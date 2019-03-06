@@ -20,6 +20,7 @@
 import os
 import sys
 sys.path.append(os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../gos'))
 
 # -- General configuration ------------------------------------------------
 
@@ -49,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'GOS'
-copyright = '2017, Carl Colglazier'
+copyright = '2019, Center for Research Computing'
 author = 'Carl Colglazier'
 
 # The version info for the project you're documenting, acts as replacement for
