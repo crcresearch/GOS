@@ -1,5 +1,4 @@
 from .gos import *
-from .visulize import *
 
 __all__ = ["World", "Globe", "Agent"]
 __title__ = 'globalopensimulator'
