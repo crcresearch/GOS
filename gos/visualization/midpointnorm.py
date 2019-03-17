@@ -1,5 +1,6 @@
 from matplotlib.colors import Normalize
 from numpy import ma
+from matplotlib import cbook
 
 # https://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib
 class MidPointNorm(Normalize):

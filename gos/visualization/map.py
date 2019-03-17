@@ -29,7 +29,7 @@ def matrix_plot(frame):
     fig = plt.gcf()
     return plt
 
-def map_plot(frame, title=None, normc = Normalize):
+def map_plot(frame, title=None, normc=Normalize):
     """
     The basic idea here is that the function returns a plot object,
     so any customization can be done after the fact on the object.
