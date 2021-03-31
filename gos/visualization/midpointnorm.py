@@ -1,6 +1,6 @@
 from matplotlib.colors import Normalize
 from numpy import ma
-from matplotlib import cbook
+import numpy as np
 
 # https://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib
 class MidPointNorm(Normalize):
@@ -55,7 +55,7 @@ class MidPointNorm(Normalize):
             raise ValueError("Not invertible until scaled")
         vmin, vmax, midpoint = self.vmin, self.vmax, self.midpoint
 
-        if cbook.iterable(value):
+        if np.iterable(value):
             val = ma.asarray(value)
             val = 2 * (val-0.5)  
             val[val>0]  *= abs(vmax - midpoint)

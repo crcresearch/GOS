@@ -64,7 +64,7 @@ def map_plot(frame, title=None, normc=Normalize):
             color=cmap(norm(country["values"]))
         )
     mapper = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
-    mapper.set_array(df['values'])
+    mapper.set_array(df['values'].to_numpy())
     cbar = plt.colorbar(
         mapper, shrink=0.7,
         orientation='horizontal'
