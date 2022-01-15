@@ -1,4 +1,6 @@
 numpy>=1.12.1
 pandas>=0.20.1
 sphinxcontrib-bibtex>=0.3.6
-Cartopy>=0.17.0
+Cartopy>=0.20.2
+haversine>=2.5.1
+openpyxl>=3.0.9
