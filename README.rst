@@ -35,3 +35,12 @@ Then install the dependencies:
 ::
 
   conda install --file requirements.txt
+
+If Jupyter Notebook doesn't recognize your conda environment, do:
+
+::
+
+  conda install -c anaconda ipykernel
+  python -m ipykernel install --user --name=[conda_env_name]
+  
+replacing [conda_env_name] with the name of your conda environment.
