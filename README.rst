@@ -9,14 +9,29 @@ Installation
 
 GOS is designed to run on Python 3.
 
-The following are dependencies:
+The following are the main dependencies:
 
 - numpy
 - pandas
 - cartopy
 
-They both be installed using pip:
+Dependencies can be installed using pip:
 
 ::
 
    pip3 install -r requirements.txt
+
+If you run into issues with installation using pip, try `conda
+<https://conda.io/>`_ instead.
+
+First, append conda-forge to your conda channels:
+
+::
+
+  conda config --append channels conda-forge
+
+Then install the dependencies:
+
+::
+
+  conda install --file requirements.txt
