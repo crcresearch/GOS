@@ -44,3 +44,6 @@ If Jupyter Notebook doesn't recognize your conda environment, do:
   python -m ipykernel install --user --name=[conda_env_name]
   
 replacing [conda_env_name] with the name of your conda environment.
+
+THE POPULAR GLOBAL MIGRATION MODEL CAN BE FOUND HERE:
+https://github.com/crcresearch/GOS/blob/master/examples/multiscale-migration/GOS%2BMultiscale%2BMigration%2BModel.ipynb
