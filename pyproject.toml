@@ -1,5 +1,5 @@
 [project]
-name = "global-open-simulator"
+name = "gos"
 version = "1.0.1"
 description = "A parallel agent-based platform for global social modelling."
 authors = [
@@ -16,10 +16,18 @@ dependencies = [
     "ipykernel>=6.29.4",
     "scipy>=1.14.0",
 ]
-requires-python = ">=3.8,<3.11"
+requires-python = ">=3.10,<3.11"
 readme = "README.rst"
 license = {file = "LICENSE"}
 
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "ruff>=0.5.2",
+]
+
+[tool.ruff]
+line-length = 120
