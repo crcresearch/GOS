@@ -21,7 +21,7 @@ class MidPointNorm(Normalize):
         vmin, vmax, midpoint = self.vmin, self.vmax, self.midpoint
 
         if not (vmin < midpoint < vmax):
-            raise ValueError("midpoint must be between maxvalue and minvalue.")       
+            raise ValueError("midpoint must be between maxvalue and minvalue.")
         elif vmin == vmax:
             result.fill(0) # Or should it be all masked? Or 0.5?
         elif vmin > vmax:
@@ -38,16 +38,16 @@ class MidPointNorm(Normalize):
             resdat = result.data
 
             #First scale to -1 to 1 range, than to from 0 to 1.
-            resdat -= midpoint            
-            resdat[resdat>0] /= abs(vmax - midpoint)            
+            resdat -= midpoint
+            resdat[resdat>0] /= abs(vmax - midpoint)
             resdat[resdat<0] /= abs(vmin - midpoint)
 
             resdat /= 2.
             resdat += 0.5
-            result = ma.array(resdat, mask=result.mask, copy=False)                
+            result = ma.array(resdat, mask=result.mask, copy=False)
 
         if is_scalar:
-            result = result[0]            
+            result = result[0]
         return result
 
     def inverse(self, value):
@@ -57,14 +57,14 @@ class MidPointNorm(Normalize):
 
         if np.iterable(value):
             val = ma.asarray(value)
-            val = 2 * (val-0.5)  
+            val = 2 * (val-0.5)
             val[val>0]  *= abs(vmax - midpoint)
             val[val<0] *= abs(vmin - midpoint)
             val += midpoint
             return val
         else:
             val = 2 * (val - 0.5)
-            if val < 0: 
+            if val < 0:
                 return  val*abs(vmin-midpoint) + midpoint
             else:
                 return  val*abs(vmax-midpoint) + midpoint

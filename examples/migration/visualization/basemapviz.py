@@ -32,7 +32,7 @@ def map(dataframe, title = "Map", colorbarName = None):
 
 	df_plot = df_plot.dropna()
 
-	cmap = plt.get_cmap('RdYlGn')   
+	cmap = plt.get_cmap('RdYlGn')
 	pc = PatchCollection(df_plot.shapes, zorder=2)
 	norm = Normalize()
 
@@ -43,7 +43,7 @@ def map(dataframe, title = "Map", colorbarName = None):
 
 	mapper.set_array(df_plot['value'])
 	cbar = plt.colorbar(mapper, shrink=0.7, label = colorbarName)
-	
+
 
 	fig = plt.gcf()
 	fig.savefig("Map.jpg")

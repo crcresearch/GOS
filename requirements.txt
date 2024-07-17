@@ -5,3 +5,4 @@ Cartopy>=0.20.2
 haversine>=2.5.1
 openpyxl>=3.0.9
 ipywidgets>=7.6.5
+pre-commit
