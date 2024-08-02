@@ -15,6 +15,7 @@ dependencies = [
     "ipywidgets>=7.6.5",
     "ipykernel>=6.29.4",
     "scipy>=1.14.0",
+    "xlrd>=2.0.1",
 ]
 requires-python = ">=3.10,<3.11"
 readme = "README.rst"
@@ -27,7 +28,13 @@ build-backend = "pdm.backend"
 [tool.pdm.dev-dependencies]
 dev = [
     "ruff>=0.5.2",
+    "pytest>=8.3.2",
 ]
 
 [tool.ruff]
 line-length = 120
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+pythonpath = ["src", "tests"]
+addopts = ["--import-mode=importlib"]
