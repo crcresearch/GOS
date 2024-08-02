@@ -1,14 +1,14 @@
-import numpy as np
 import os
-import pandas as pd
+
 import cartopy.crs as ccrs
-from cartopy.io.shapereader import Reader
+import pandas as pd
 from cartopy.feature import ShapelyFeature
+from cartopy.io.shapereader import Reader
 from shapely.geometry.multipolygon import MultiPolygon
 
 
 def get_df_plot():
-    mod_dir, filename = os.path.split(__file__)
+    mod_dir, _ = os.path.split(__file__)
     shape_path = os.path.join(mod_dir, "World", "World.shp")
     countries = Reader(shape_path)
     shapes = []
@@ -31,7 +31,7 @@ dfplot, isos = get_df_plot()
 
 
 def read_lat_lon():
-    mod_dir, filename = os.path.split(__file__)
+    mod_dir, _ = os.path.split(__file__)
     data = pd.read_csv(
         os.path.join(mod_dir, "data", "Country_List_ISO_3166_Codes_Latitude_Longitude.csv"),
         usecols=[2, 4, 5],

@@ -1,11 +1,13 @@
+from contextlib import suppress
+
+import cartopy.crs as ccrs
 import matplotlib
 import matplotlib.pyplot as plt
-from cartopy.feature import OCEAN, LAND, ShapelyFeature
-import cartopy.crs as ccrs
-from .dfplot import dfplot, isos, latlon
-from matplotlib.colors import Normalize
 import numpy as np
-from .midpointnorm import MidPointNorm
+from cartopy.feature import LAND, OCEAN
+from matplotlib.colors import Normalize
+
+from .dfplot import dfplot, isos, latlon
 
 
 def matrix_plot(frame):
@@ -18,16 +20,13 @@ def matrix_plot(frame):
     for _, x in frame.iterrows():
         for _, y in frame.iterrows():
             if frame[x.name][y.name] > 1:
-                try:
+                with suppress():
                     plt.plot(
                         [d[x.name]["Longitude (average)"], d[y.name]["Longitude (average)"]],
                         [d[x.name]["Latitude (average)"], d[y.name]["Latitude (average)"]],
                         linewidth=2,
                         transform=ccrs.Geodetic(),
                     )
-                except:
-                    pass
-    fig = plt.gcf()
     return plt
 
 
@@ -58,8 +57,6 @@ def map_plot(frame, title=None, normc=Normalize):
         ax.add_feature(country["shapes"], color=cmap(norm(country["values"])))
     mapper = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
     mapper.set_array(df["values"].to_numpy())
-    cbar = plt.colorbar(mapper, shrink=0.7, orientation="horizontal")
     if title:
         plt.title(title, fontsize=50, y=1.08)
-    fig = plt.gcf()
     return plt
