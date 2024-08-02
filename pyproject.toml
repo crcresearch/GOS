@@ -29,6 +29,7 @@ build-backend = "pdm.backend"
 dev = [
     "ruff>=0.5.2",
     "pytest>=8.3.2",
+    "dvc>=3.53.0",
 ]
 
 [tool.ruff]
