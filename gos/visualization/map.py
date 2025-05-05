@@ -67,7 +67,8 @@ def map_plot(frame, title=None, normc=Normalize):
     mapper.set_array(df['values'].to_numpy())
     cbar = plt.colorbar(
         mapper, shrink=0.7,
-        orientation='horizontal'
+        orientation='horizontal',
+        ax=ax
     )
     if title:
         plt.title(title, fontsize=50, y=1.08)
